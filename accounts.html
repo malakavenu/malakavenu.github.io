@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Srimitra Lifestyle — Account Statement Dashboard</title>
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22252f; --border:#2a2d3a;
+  --text:#e4e4e8; --text2:#9ca3af; --text3:#6b7280;
+  --accent:#6366f1; --accent2:#818cf8;
+  --green:#34d399; --green-bg:rgba(52,211,153,.12);
+  --red:#f87171; --red-bg:rgba(248,113,113,.12);
+  --amber:#fbbf24; --amber-bg:rgba(251,191,36,.12);
+  --blue:#60a5fa; --blue-bg:rgba(96,165,250,.12);
+  --teal:#2dd4bf; --teal-bg:rgba(45,212,191,.12);
+  --sidebar-w:200px;
+}
+[data-theme="light"] {
+  --bg:#f5f5f7; --surface:#fff; --surface2:#f0f0f3; --border:#e0e0e5;
+  --text:#1a1a2e; --text2:#555; --text3:#888;
+  --green-bg:rgba(16,185,129,.1); --red-bg:rgba(239,68,68,.1);
+  --amber-bg:rgba(245,158,11,.1); --blue-bg:rgba(59,130,246,.1);
+  --teal-bg:rgba(45,212,191,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;display:flex;min-height:100vh;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* Health Score Badge */
+.health-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;font-size:11px;font-weight:600;margin-top:8px}
+.health-badge.excellent{background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+.health-badge.good{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.health-badge.caution{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
+.health-badge.warning{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.health-dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-brand{padding:20px 16px 12px;font-size:14px;font-weight:700;color:var(--teal);border-bottom:1px solid var(--border);letter-spacing:.3px}
+.sidebar-nav{flex:1;padding:8px 0}
+.nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:12px;color:var(--text2);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.nav-link:hover{color:var(--text);background:rgba(45,212,191,.06)}
+.nav-link.active{color:var(--teal);border-left-color:var(--teal);background:rgba(45,212,191,.08);font-weight:600}
+.nav-link .icon{width:18px;text-align:center;font-size:14px;flex-shrink:0}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:6px;flex-direction:column}
+.sidebar-btn{padding:8px 0;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;text-align:center;transition:all .15s;text-decoration:none;display:block}
+.sidebar-btn:hover{border-color:var(--teal);color:var(--text)}
+
+.main{margin-left:var(--sidebar-w);flex:1;padding:24px 32px 60px;max-width:1200px}
+.header{margin-bottom:8px}
+.header h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--text),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
+.header-sub{color:var(--text2);font-size:13px}
+
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 24px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;align-items:center}
+.filter-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-right:8px;flex-shrink:0}
+.filter-chip{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.filter-chip:hover{border-color:var(--teal);color:var(--text)}
+.filter-chip.on{background:var(--teal);border-color:var(--teal);color:#0f1117;font-weight:600}
+
+section{margin-bottom:40px;scroll-margin-top:20px}
+.sec-title{font-size:17px;font-weight:600;margin-bottom:4px}
+.sec-desc{font-size:12px;color:var(--text3);margin-bottom:14px}
+
+/* Hero Balance */
+.hero-balance{background:linear-gradient(135deg,rgba(45,212,191,.08),rgba(99,102,241,.06));border:2px solid var(--teal);border-radius:16px;padding:28px 32px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden}
+.hero-balance::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(45,212,191,.15),transparent);border-radius:50%}
+.hero-balance::after{content:'';position:absolute;bottom:-30px;left:-30px;width:80px;height:80px;background:radial-gradient(circle,rgba(99,102,241,.1),transparent);border-radius:50%}
+.hero-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--teal);margin-bottom:6px;font-weight:600}
+.hero-amount{font-size:42px;font-weight:800;color:var(--text);line-height:1.1;margin-bottom:4px}
+.hero-sub{font-size:12px;color:var(--text3)}
+.hero-sub b{color:var(--text2)}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stats-5{grid-template-columns:repeat(5,1fr)}
+.stats-3{grid-template-columns:repeat(3,1fr)}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.stat-v{font-size:22px;font-weight:700;color:var(--accent2)}
+.stat-v.up{color:var(--green)} .stat-v.dn{color:var(--red)} .stat-v.tl{color:var(--teal)}
+.stat-l{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);margin-top:4px}
+.stat-mini{font-size:10px;color:var(--text3);margin-top:2px}
+.stat-accent{border-top:3px solid var(--accent)}
+.stat-spark{display:flex;align-items:flex-end;justify-content:center;gap:2px;height:24px;margin-top:6px}
+.stat-spark-bar{width:4px;border-radius:2px;background:var(--teal);opacity:.5;transition:height .3s}
+
+/* Gauge */
+.gauge-wrap{display:flex;justify-content:center;align-items:center;gap:24px;margin:16px 0}
+.gauge-svg{width:200px;height:120px}
+.gauge-labels{text-align:left}
+.gauge-labels div{margin-bottom:6px;font-size:11px;color:var(--text2)}
+.gauge-labels span{font-weight:700;color:var(--text)}
+
+/* Flow */
+.flow-chart{display:flex;align-items:center;justify-content:center;gap:12px;padding:20px;margin:12px 0}
+.flow-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 24px;text-align:center;min-width:140px}
+.flow-box .fb-val{font-size:20px;font-weight:700;margin-bottom:2px}
+.flow-box .fb-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.flow-arrow{font-size:24px;color:var(--text3)}
+
+/* Charts */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.box-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px}
+
+/* Monthly Bars */
+.bar-chart-wrap{position:relative;margin:12px 0}
+.bar-row{display:grid;gap:6px;margin:12px 0}
+.bar-col{text-align:center}
+.bar-area{height:160px;display:flex;align-items:flex-end;justify-content:center;gap:3px;margin-bottom:6px}
+.bar-stick{width:20px;border-radius:3px 3px 0 0;position:relative;transition:height .4s;cursor:pointer}
+.bar-stick:hover{opacity:.8}
+.bar-stick .bv{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:7px;font-weight:700;white-space:nowrap}
+.bar-lbl{font-size:9px;font-weight:600}
+.bar-sub{font-size:8px;color:var(--text3)}
+.bar-avg{position:absolute;left:0;right:0;border-top:2px dashed var(--amber);z-index:1;pointer-events:none}
+.bar-avg-lbl{position:absolute;right:0;font-size:9px;color:var(--amber);transform:translateY(-14px)}
+
+/* Heatmap */
+.heatmap{display:grid;gap:2px;margin:12px 0}
+.hm-cell{border-radius:4px;padding:4px 2px;text-align:center;font-size:9px;font-weight:600;transition:transform .15s;cursor:default;min-height:28px;display:flex;align-items:center;justify-content:center}
+.hm-cell:hover{transform:scale(1.15);z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hm-header{font-size:9px;color:var(--text3);text-align:center;font-weight:600;padding:4px 2px}
+.hm-row-label{font-size:10px;color:var(--text2);text-align:right;padding-right:6px;display:flex;align-items:center;justify-content:flex-end}
+.hm-legend{display:flex;align-items:center;gap:4px;justify-content:center;margin-top:8px;font-size:9px;color:var(--text3)}
+.hm-legend-bar{height:8px;border-radius:4px;width:120px;background:linear-gradient(90deg,var(--surface2),var(--teal))}
+
+/* Horizontal bars */
+.hbar-row{display:flex;align-items:center;margin-bottom:7px}
+.hbar-label{width:140px;font-size:11px;color:var(--text2);text-align:right;padding-right:10px;flex-shrink:0}
+.hbar-track{flex:1;height:10px;background:var(--surface2);border-radius:5px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:5px;transition:width .5s}
+.hbar-val{width:80px;font-size:11px;font-weight:600;text-align:right;padding-left:8px;flex-shrink:0;font-variant-numeric:tabular-nums}
+
+/* Line Chart */
+.line-chart{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative}
+.line-chart svg{width:100%;height:auto}
+.line-chart text{fill:var(--text2);font-size:10px}
+.line-chart .grid-line{stroke:var(--border);stroke-width:1}
+.line-chart .data-line{fill:none;stroke-width:2.5}
+.line-chart .line-income{stroke:var(--green)}
+.line-chart .line-expense{stroke:var(--red)}
+.line-chart .line-balance{stroke:var(--teal)}
+.line-chart .avg-line{stroke:var(--amber);stroke-width:1.5;stroke-dasharray:6 4}
+.line-chart .dot{cursor:pointer}
+.line-chart .dot:hover{r:5}
+.chart-tooltip{position:absolute;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;pointer-events:none;z-index:50;display:none;white-space:nowrap}
+.chart-legend{display:flex;gap:16px;justify-content:center;margin-bottom:8px;font-size:11px}
+.chart-legend span{display:flex;align-items:center;gap:4px}
+.chart-legend .ldot{width:10px;height:3px;border-radius:2px}
+
+/* Donut */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.legend{font-size:11px}
+.legend-row{display:flex;align-items:center;gap:6px;padding:2px 0}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.legend-name{flex:1;color:var(--text2)}
+.legend-val{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Table */
+.tw{overflow-x:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0 16px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{background:var(--surface2);color:var(--text2);padding:9px 10px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+thead th:hover{color:var(--text)}
+thead th.sorted{color:var(--teal)}
+thead th.sorted::after{content:" \u25B2";font-size:8px}
+thead th.sorted.desc::after{content:" \u25BC"}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--border)}
+tbody tr:hover{background:rgba(45,212,191,.04)}
+tbody tr:last-child td{border-bottom:none}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.tr-total td{font-weight:700;background:rgba(45,212,191,.08)!important;border-top:2px solid var(--teal)}
+
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:9px;font-weight:700}
+.pill.up{background:var(--green-bg);color:var(--green)}
+.pill.dn{background:var(--red-bg);color:var(--red)}
+.pill.fl{background:rgba(107,114,128,.15);color:var(--text3)}
+.pill.tl{background:var(--teal-bg);color:var(--teal)}
+
+/* Top Cards */
+.top-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
+.top-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 12px;position:relative;overflow:hidden;transition:border-color .15s}
+.top-card:hover{border-color:var(--teal)}
+.top-rank{position:absolute;top:8px;right:10px;font-size:20px;font-weight:800;color:var(--border);line-height:1}
+.top-amt{font-size:18px;font-weight:700;color:var(--red);margin-bottom:2px}
+.top-vendor{font-size:11px;font-weight:600;margin-bottom:1px}
+.top-detail{font-size:9px;color:var(--text3)}
+
+/* Efficiency Ring */
+.ring-wrap{display:flex;justify-content:center;gap:40px;margin:16px 0}
+.ring-item{text-align:center}
+.ring-label{font-size:11px;color:var(--text2);margin-top:6px}
+.ring-value{font-size:13px;font-weight:700}
+
+/* Insights */
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.insight{padding:12px;border-radius:8px;border-left:3px solid}
+.insight.g{background:var(--green-bg);border-color:var(--green)}
+.insight.r{background:var(--red-bg);border-color:var(--red)}
+.insight.a{background:var(--amber-bg);border-color:var(--amber)}
+.insight.b{background:var(--blue-bg);border-color:var(--blue)}
+.insight.t{background:var(--teal-bg);border-color:var(--teal)}
+.insight-t{font-weight:700;font-size:12px;margin-bottom:3px}
+.insight-d{font-size:11px;color:var(--text2);line-height:1.35}
+
+/* Search */
+.search-bar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.search-input{flex:1;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;outline:none}
+.search-input:focus{border-color:var(--teal)}
+.search-count{font-size:11px;color:var(--text3);white-space:nowrap}
+
+/* Footer */
+.footer{text-align:center;padding:16px 0;font-size:10px;color:var(--text3);border-top:1px solid var(--border);margin-top:32px}
+
+/* Mobile */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:4px 0 max(4px,env(safe-area-inset-bottom))}
+.mobile-nav-inner{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:2px;padding:0 4px}
+.mobile-nav-inner::-webkit-scrollbar{display:none}
+.mob-link{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 10px;font-size:9px;color:var(--text3);text-decoration:none;border-radius:8px;min-width:56px;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.mob-link.active{color:var(--teal);background:rgba(45,212,191,.1)}
+.mob-link .mob-icon{font-size:16px}
+.mob-link span:last-child{white-space:nowrap}
+.mobile-toolbar{display:none;position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:200;padding:8px 12px;align-items:center;justify-content:space-between}
+.mob-title{font-size:14px;font-weight:700;color:var(--teal)}
+.mob-actions{display:flex;gap:6px}
+.mob-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent;text-decoration:none}
+
+@media(max-width:900px){
+  .sidebar{width:60px} .sidebar-brand,.nav-link span:not(.icon){display:none} .nav-link{justify-content:center;padding:12px 0} .main{margin-left:60px;padding:16px}
+  .stats,.stats-5{grid-template-columns:repeat(2,1fr)} .grid2{grid-template-columns:1fr} .insight-grid{grid-template-columns:1fr}
+  .top-grid{grid-template-columns:repeat(2,1fr)}
+  .flow-chart{flex-wrap:wrap} .gauge-wrap{flex-wrap:wrap} .ring-wrap{flex-wrap:wrap;gap:20px}
+}
+@media(max-width:768px){
+  .sidebar{display:none!important;width:0!important;visibility:hidden!important}
+  .mobile-nav{display:block!important}
+  .mobile-toolbar{display:flex!important}
+  .main{margin-left:0!important;padding:52px 12px 68px 12px!important;max-width:100%!important}
+  .header{display:none!important}
+  .stats,.stats-5,.stats-3{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .stat{padding:12px 10px} .stat-v{font-size:18px} .stat-l{font-size:8px}
+  .hero-balance{padding:20px 16px} .hero-amount{font-size:30px}
+  .filter-bar{padding:8px;gap:4px;margin:8px 0 16px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-chip{padding:8px 14px;font-size:12px;flex-shrink:0}
+  .filter-label{display:none}
+  .sec-title{font-size:16px} .sec-desc{font-size:11px} section{margin-bottom:24px}
+  .grid2{gap:10px} .box{padding:12px;border-radius:8px}
+  .top-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .top-card{padding:10px 8px} .top-amt{font-size:15px} .top-rank{font-size:16px} .top-vendor{font-size:10px}
+  .hbar-label{width:80px;font-size:10px} .hbar-val{width:60px;font-size:10px}
+  .search-input{padding:12px 14px;font-size:14px;border-radius:10px}
+  .flow-chart{flex-direction:column;gap:8px} .flow-arrow{transform:rotate(90deg)}
+  .donut-wrap{flex-direction:column;gap:12px;align-items:center}
+  .bar-stick{width:14px} .bar-stick .bv{font-size:6px} .bar-area{height:120px}
+  table{font-size:10px} thead th{padding:8px 6px;font-size:9px} tbody td{padding:7px 6px}
+  .gauge-wrap{flex-direction:column;gap:12px} .gauge-svg{width:180px;height:110px}
+  .ring-wrap{gap:16px}
+}
+@media print{
+  .sidebar,.mobile-nav,.mobile-toolbar,.filter-bar,.search-bar{display:none!important}
+  .main{margin-left:0!important;padding:10px!important;max-width:100%!important}
+  body{background:#fff;color:#222} .stat,.box,.insight,.top-card{break-inside:avoid}
+  .hero-balance{border-color:#2dd4bf!important}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar"></div>
+<div class="mobile-toolbar">
+  <span class="mob-title">Account Statement</span>
+  <div class="mob-actions">
+    <button class="mob-btn" id="mobTheme2" onclick="toggleTheme()">&#9728;</button>
+    <a class="mob-btn" href="Srimitra-expenditure.html" style="text-decoration:none;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent2);border-color:var(--accent2)">&#128202; Expenditure</a>
+    <button class="mob-btn" onclick="window.print()">&#128196;</button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="header">
+    <h1>Srimitra Lifestyle &mdash; Account Statement</h1>
+    <div class="header-sub" id="headerSub">Equitas Small Finance Bank | Nov 2024 &ndash; Sep 2025</div>
+  </div>
+  <div class="filter-bar" id="filterBar"></div>
+
+  <section id="overview"><div class="sec-title">Financial Overview</div><div class="sec-desc" id="overviewDesc"></div><div id="heroCard"></div><div class="stats stats-5" id="statsGrid"></div><div id="gaugeArea"></div><div class="flow-chart" id="flowChart"></div></section>
+
+  <section id="barchart"><div class="sec-title">Monthly Income vs Expense</div><div class="sec-desc" id="barDesc"></div><div class="box" id="barChartBox"></div></section>
+
+  <section id="monthly"><div class="sec-title">Monthly Cash Flow</div><div class="sec-desc" id="monthlyDesc"></div><div class="chart-legend" id="chartLegend"></div><div class="line-chart" id="lineChart"></div><div class="tw" id="monthlyTable"></div></section>
+
+  <section id="heatmap"><div class="sec-title">Income Heatmap</div><div class="sec-desc">Category-wise income intensity across months</div><div style="overflow-x:auto" id="heatmapWrap"></div></section>
+
+  <section id="income"><div class="sec-title">Income Sources</div><div class="sec-desc" id="incomeDesc">Breakdown of incoming funds by category</div><div class="grid2" id="incomeCharts"></div></section>
+
+  <section id="expenses"><div class="sec-title">Expense Categories</div><div class="sec-desc" id="expenseDesc">Breakdown of outgoing payments by category</div><div class="grid2" id="expenseCharts"></div></section>
+
+  <section id="balance"><div class="sec-title">Balance Trend</div><div class="sec-desc">Month-end account balance progression</div><div class="line-chart" id="balanceChart"></div></section>
+
+  <section id="comparison"><div class="sec-title">Income vs Expenditure</div><div class="sec-desc" id="compDesc">Cross-reference bank data with committee expenditure records</div><div class="stats stats-3" id="compStats"></div><div id="ringArea"></div><div class="insight-grid" id="compInsights"></div></section>
+
+  <section id="topspends"><div class="sec-title">Top Outgoing Payments</div><div class="sec-desc">Largest individual outgoing transactions in the selected period</div><div class="top-grid" id="topGrid"></div></section>
+
+  <section id="txns"><div class="sec-title">Transactions</div><div class="sec-desc" id="txnDesc"></div><div class="search-bar"><input class="search-input" id="txnSearch" placeholder="Search narration, date, amount, category..." oninput="renderTxnTable()"><span class="search-count" id="txnCount"></span></div><div class="tw" id="txnTable"></div></section>
+
+  <section id="insights"><div class="sec-title">Key Insights</div><div class="sec-desc">Auto-generated observations from the account data</div><div class="insight-grid" id="insightGrid"></div></section>
+
+  <div class="footer">Srimitra Lifestyle Apartment &mdash; Account Statement Dashboard &mdash; Data extracted via OCR from Equitas Bank statements &mdash; Balance-verified (96.8% accuracy) &mdash; Net growth uses PDF month-end balances</div>
+</div>
+
+<div class="mobile-nav"><div class="mobile-nav-inner" id="mobileNav"></div></div>
+<div class="chart-tooltip" id="tooltip"></div>
+
+<script>
+const MONTHLY = [
+  {month:'2024-11',label:'Nov 24',income:898251,expense:420127,net:108124,bal:870147,txns:200},
+  {month:'2024-12',label:'Dec 24',income:838502,expense:287521,net:27398,bal:897545,txns:200},
+  {month:'2025-01',label:'Jan 25',income:777800,expense:465301,net:204399,bal:1101944,txns:194},
+  {month:'2025-02',label:'Feb 25',income:1080909,expense:1041008,net:-301699,bal:800245,txns:253},
+  {month:'2025-03',label:'Mar 25',income:875184,expense:786511,net:83299,bal:883544,txns:241},
+  {month:'2025-04',label:'Apr 25',income:742225,expense:739405,net:7144,bal:890688,txns:197},
+  {month:'2025-05',label:'May 25',income:856575,expense:583582,net:285694,bal:1176382,txns:209},
+  {month:'2025-06',label:'Jun 25',income:667117,expense:702427,net:-49810,bal:1126572,txns:171},
+  {month:'2025-07',label:'Jul 25',income:875992,expense:787821,net:92371,bal:1218943,txns:211},
+  {month:'2025-08',label:'Aug 25',income:762247,expense:982584,net:-222837,bal:996106,txns:192},
+  {month:'2025-09',label:'Sep 25',income:821100,expense:756373,net:71097,bal:1067203,txns:185},
+];
+
+const MONTHLY_CAT = {
+  '2024-11':{'Bank Charges':{i:1,e:0},'Digital Payments':{i:8000,e:108652},'Housekeeping':{i:0,e:34677},'Maintenance':{i:24200,e:0},'Other':{i:101950,e:125104},'Rent Collections':{i:764100,e:0},'Salary':{i:0,e:23000},'Security Services':{i:0,e:128694}},
+  '2024-12':{'Bank Charges':{i:0,e:30},'Digital Payments':{i:0,e:89530},'Fuel/Purchases':{i:0,e:13594},'Maintenance':{i:5100,e:0},'Other':{i:119002,e:125200},'Rent Collections':{i:714400,e:0},'Salary':{i:0,e:10000},'Security Services':{i:0,e:49167}},
+  '2025-01':{'Bank Charges':{i:0,e:67},'Digital Payments':{i:0,e:87473},'Maintenance':{i:4200,e:0},'Other':{i:443650,e:211346},'Rent Collections':{i:329950,e:0},'Salary':{i:0,e:10000},'Security Services':{i:0,e:49613},'Vendor Payments':{i:0,e:106803}},
+  '2025-02':{'Bank Charges':{i:0,e:98},'Cheque Deposits':{i:44800,e:0},'Digital Payments':{i:26800,e:263761},'Maintenance':{i:32700,e:0},'Other':{i:44300,e:613897},'Rent Collections':{i:932309,e:0},'Security Services':{i:0,e:162726},'Vendor Payments':{i:0,e:526}},
+  '2025-03':{'Bank Charges':{i:0,e:85},'Digital Payments':{i:4925,e:125737},'Fuel/Purchases':{i:0,e:18048},'Maintenance':{i:4000,e:0},'Other':{i:94159,e:609358},'Rent Collections':{i:772100,e:0},'Salary':{i:0,e:23000},'Vendor Payments':{i:0,e:10283}},
+  '2025-04':{'Bank Charges':{i:0,e:81},'Digital Payments':{i:0,e:92809},'Other':{i:117325,e:578607},'Rent Collections':{i:624900,e:0},'Salary':{i:0,e:23000},'Vendor Payments':{i:0,e:44908}},
+  '2025-05':{'Bank Charges':{i:0,e:66},'Digital Payments':{i:0,e:92780},'Fuel/Purchases':{i:0,e:18450},'Other':{i:78175,e:449286},'Rent Collections':{i:778400,e:0},'Salary':{i:0,e:23000}},
+  '2025-06':{'Bank Charges':{i:0,e:87},'Digital Payments':{i:0,e:77614},'Fuel/Purchases':{i:0,e:18450},'Maintenance':{i:0,e:160650},'Other':{i:45917,e:422163},'Rent Collections':{i:621200,e:0},'Salary':{i:0,e:23000},'Vendor Payments':{i:0,e:463}},
+  '2025-07':{'Bank Charges':{i:0,e:56},'Digital Payments':{i:0,e:91141},'Fuel/Purchases':{i:0,e:18450},'Other':{i:75792,e:611416},'Rent Collections':{i:800200,e:0},'Salary':{i:0,e:23000},'Vendor Payments':{i:0,e:43758}},
+  '2025-08':{'Bank Charges':{i:0,e:72},'Cheque Payments':{i:0,e:163468},'Digital Payments':{i:0,e:98183},'Fuel/Purchases':{i:0,e:37134},'Other':{i:63151,e:657442},'Rent Collections':{i:699096,e:0},'Salary':{i:0,e:23000},'Vendor Payments':{i:0,e:3286}},
+  '2025-09':{'Bank Charges':{i:0,e:64},'Cash Deposits':{i:55800,e:0},'Cheque Payments':{i:0,e:163468},'Digital Payments':{i:0,e:96247},'Fuel/Purchases':{i:0,e:37134},'Maintenance':{i:0,e:157300},'Other':{i:42300,e:279160},'Rent Collections':{i:723000,e:0},'Salary':{i:0,e:23000}},
+};
+
+const CAT_COLORS = {
+  'Rent Collections':'#818cf8','Digital Payments':'#f472b6','Maintenance':'#34d399',
+  'Salary':'#fbbf24','Security Services':'#f87171','Housekeeping':'#60a5fa',
+  'Fuel/Purchases':'#fb923c','Other':'#94a3b8','Bank Charges':'#6b7280',
+  'Vendor Payments':'#c084fc','Cheque Payments':'#e879f9','Cheque Deposits':'#a78bfa',
+  'Cash Deposits':'#22d3ee'
+};
+
+const EXPENDITURE_QUARTERLY = [
+  {label:'Q3 FY25 (Nov-Dec 24)',total:523789},
+  {label:'Q4 FY25 (Jan-Mar 25)',total:673671},
+  {label:'Q1 FY26 (Apr-Jun 25)',total:766539},
+  {label:'Q2 FY26 (Jul-Sep 25)',total:723068},
+];
+
+
+const TXN = [
+  {d:'2024-11-02',type:'withdrawal',amt:23000,bal:762273,cat:'Salary',n:'Sagayanandan S'},
+  {d:'2024-11-02',type:'deposit',amt:34500,bal:804973,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2024-11-02',type:'withdrawal',amt:43200,bal:761773,cat:'Other',n:'Huchchanagouda Patil'},
+  {d:'2024-11-06',type:'deposit',amt:13800,bal:1101673,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2024-11-06',type:'withdrawal',amt:12000,bal:1089673,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2024-11-06',type:'withdrawal',amt:9990,bal:1083873,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2024-11-06',type:'withdrawal',amt:46000,bal:1037873,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2024-11-06',type:'withdrawal',amt:45742,bal:992131,cat:'Security Services',n:'Sarup Rai Security'},
+  {d:'2024-11-08',type:'withdrawal',amt:34677,bal:1042705,cat:'Housekeeping',n:'Afjal Hussain'},
+  {d:'2024-11-09',type:'deposit',amt:16800,bal:1072305,cat:'Other',n:'Blaze Fire Protections'},
+  {d:'2024-11-09',type:'deposit',amt:37000,bal:1109305,cat:'Other',n:'Blaze Fire Protections'},
+  {d:'2024-11-10',type:'withdrawal',amt:24500,bal:1097105,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2024-11-10',type:'withdrawal',amt:6715,bal:1090390,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2024-11-10',type:'withdrawal',amt:82952,bal:1007438,cat:'Security Services',n:'Sarup Rai Security'},
+  {d:'2024-11-10',type:'withdrawal',amt:43627,bal:963811,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2024-11-12',type:'deposit',amt:12300,bal:980711,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2024-11-13',type:'withdrawal',amt:43025,bal:945886,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2024-12-02',type:'deposit',amt:10000,bal:926147,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2024-12-08',type:'withdrawal',amt:10000,bal:1279419,cat:'Salary',n:'Cherukuri Durga Char'},
+  {d:'2024-12-09',type:'withdrawal',amt:12000,bal:1271619,cat:'Other',n:'Tv Gangadhara'},
+  {d:'2024-12-09',type:'deposit',amt:24500,bal:1089719,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2024-12-09',type:'withdrawal',amt:38000,bal:1051719,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2024-12-09',type:'withdrawal',amt:9990,bal:1041719,cat:'Other',n:'C Kumar'},
+  {d:'2024-12-09',type:'withdrawal',amt:13594,bal:1028125,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2024-12-09',type:'withdrawal',amt:49167,bal:978958,cat:'Security Services',n:'Sarup Rai Security'},
+  {d:'2024-12-11',type:'withdrawal',amt:45762,bal:859013,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2024-12-11',type:'withdrawal',amt:43768,bal:815245,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2024-12-16',type:'deposit',amt:10600,bal:885745,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2024-12-30',type:'withdrawal',amt:65200,bal:884695,cat:'Other',n:'Cnrb0005910'},
+  {d:'2025-01-05',type:'deposit',amt:10000,bal:1108878,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-01-05',type:'deposit',amt:10000,bal:1163478,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-01-05',type:'deposit',amt:12600,bal:1211378,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-01-06',type:'withdrawal',amt:10000,bal:1244278,cat:'Salary',n:'500613813909 3270792'},
+  {d:'2025-01-09',type:'withdrawal',amt:10000,bal:1339078,cat:'Other',n:'C Kumar'},
+  {d:'2025-01-09',type:'withdrawal',amt:24500,bal:1314578,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-01-09',type:'withdrawal',amt:43000,bal:1271578,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-01-09',type:'withdrawal',amt:49613,bal:1221965,cat:'Security Services',n:'Sarup Rai Security'},
+  {d:'2025-01-10',type:'withdrawal',amt:43967,bal:1080898,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-01-10',type:'withdrawal',amt:43506,bal:1037392,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-01-15',type:'withdrawal',amt:43188,bal:1063454,cat:'Other',n:'Parviom Technologies'},
+  {d:'2025-01-18',type:'withdrawal',amt:12000,bal:1085854,cat:'Other',n:'Tv Gangadhara'},
+  {d:'2025-01-21',type:'withdrawal',amt:43200,bal:1076264,cat:'Other',n:'Prasanna R'},
+  {d:'2025-01-23',type:'withdrawal',amt:6730,bal:1073734,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-01-25',type:'deposit',amt:15900,bal:1159498,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-01-26',type:'withdrawal',amt:18059,bal:1169270,cat:'Other',n:'Treis Solutions Llp'},
+  {d:'2025-01-28',type:'withdrawal',amt:30000,bal:1147710,cat:'Other',n:'Pawan Electrical Har'},
+  {d:'2025-01-29',type:'deposit',amt:10400,bal:1162310,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-01-30',type:'withdrawal',amt:59666,bal:1100744,cat:'Other',n:'Raju Ram Sirvi'},
+  {d:'2025-01-31',type:'withdrawal',amt:7000,bal:1101944,cat:'Other',n:'Uma Munusamy'},
+  {d:'2025-02-01',type:'withdrawal',amt:40700,bal:1125943,cat:'Other',n:'Bank Account Xxxxxxx'},
+  {d:'2025-02-02',type:'withdrawal',amt:10000,bal:1145929,cat:'Other',n:'Sbino0000854'},
+  {d:'2025-02-03',type:'withdrawal',amt:10000,bal:1148579,cat:'Other',n:'Panchanan Nayak'},
+  {d:'2025-02-04',type:'withdrawal',amt:6000,bal:979863,cat:'Other',n:'Vishwanatharao S'},
+  {d:'2025-02-06',type:'withdrawal',amt:64000,bal:1032986,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-06',type:'withdrawal',amt:237200,bal:808586,cat:'Other',n:'503712452470 5910101'},
+  {d:'2025-02-08',type:'withdrawal',amt:6000,bal:851786,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-09',type:'withdrawal',amt:113500,bal:759941,cat:'Security Services',n:'Sarup Rai Security'},
+  {d:'2025-02-09',type:'withdrawal',amt:49226,bal:710715,cat:'Security Services',n:'Sarup Rai Security'},
+  {d:'2025-02-09',type:'withdrawal',amt:10000,bal:700715,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-09',type:'withdrawal',amt:24500,bal:676215,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-02-09',type:'withdrawal',amt:38000,bal:638215,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-02-11',type:'deposit',amt:44800,bal:704615,cat:'Cheque Deposits',n:'Cheque Deposit'},
+  {d:'2025-02-11',type:'withdrawal',amt:50000,bal:658715,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-12',type:'withdrawal',amt:44406,bal:636009,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-13',type:'withdrawal',amt:44810,bal:606799,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-18',type:'deposit',amt:10000,bal:662948,cat:'Rent Collections',n:'Cashfree'},
+  {d:'2025-02-20',type:'withdrawal',amt:12000,bal:686548,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-21',type:'deposit',amt:16800,bal:812948,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-22',type:'deposit',amt:10000,bal:830948,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-24',type:'deposit',amt:16800,bal:861048,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-02-25',type:'withdrawal',amt:20000,bal:885548,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-02-25',type:'withdrawal',amt:180000,bal:710948,cat:'Other',n:'Cnrb0005910'},
+  {d:'2025-02-26',type:'deposit',amt:16800,bal:7164948,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-02-28',type:'withdrawal',amt:57903,bal:737145,cat:'Other',n:'Arif Hussain'},
+  {d:'2025-02-28',type:'deposit',amt:12600,bal:749745,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-03-01',type:'deposit',amt:12000,bal:940845,cat:'Other',n:'Digvijay Kumar Anupam'},
+  {d:'2025-03-01',type:'withdrawal',amt:30000,bal:911220,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-03-02',type:'deposit',amt:16400,bal:995935,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-03-06',type:'withdrawal',amt:10000,bal:1167320,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-03-06',type:'withdrawal',amt:5075,bal:1162370,cat:'Other',n:'| Upifin( Upi Ref No P2M- Cumins Ge'},
+  {d:'2025-03-06',type:'withdrawal',amt:38000,bal:1132795,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-03-06',type:'withdrawal',amt:24500,bal:1108295,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-03-07',type:'withdrawal',amt:64500,bal:1052904,cat:'Other',n:'Hdfc0001050'},
+  {d:'2025-03-08',type:'withdrawal',amt:44731,bal:1036798,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-03-08',type:'withdrawal',amt:41006,bal:995792,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-03-09',type:'withdrawal',amt:23000,bal:981192,cat:'Salary',n:'506817611853 3270792'},
+  {d:'2025-03-11',type:'withdrawal',amt:15000,bal:994942,cat:'Other',n:'Panchanan Nayak'},
+  {d:'2025-03-11',type:'withdrawal',amt:25166,bal:969776,cat:'Other',n:'Print18'},
+  {d:'2025-03-12',type:'withdrawal',amt:35000,bal:947723,cat:'Other',n:'Min Taj Uddin'},
+  {d:'2025-03-13',type:'withdrawal',amt:113000,bal:835223,cat:'Other',n:'Ubin0552275'},
+  {d:'2025-03-13',type:'withdrawal',amt:50571,bal:784652,cat:'Other',n:'507209691468 5227020'},
+  {d:'2025-03-14',type:'withdrawal',amt:36000,bal:747762,cat:'Other',n:'Min Taj Uddin'},
+  {d:'2025-03-15',type:'withdrawal',amt:6620,bal:763417,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-03-15',type:'withdrawal',amt:6360,bal:757057,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-03-17',type:'withdrawal',amt:13000,bal:752607,cat:'Other',n:'Panchanan Nayak'},
+  {d:'2025-03-18',type:'withdrawal',amt:80000,bal:680232,cat:'Other',n:'Renukesh K'},
+  {d:'2025-03-26',type:'withdrawal',amt:18048,bal:848049,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-03-28',type:'deposit',amt:10600,bal:863099,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-03-28',type:'deposit',amt:20000,bal:883099,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-03-28',type:'withdrawal',amt:6940,bal:922860,cat:'Other',n:'Shivaleela B'},
+  {d:'2025-03-29',type:'deposit',amt:20000,bal:942860,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-03-29',type:'withdrawal',amt:12000,bal:947919,cat:'Other',n:'Tv Gangadhara'},
+  {d:'2025-03-31',type:'withdrawal',amt:77000,bal:879344,cat:'Other',n:'Rajesh K M'},
+  {d:'2025-04-03',type:'deposit',amt:26500,bal:959067,cat:'Other',n:'Malaka Venugopal Red'},
+  {d:'2025-04-05',type:'withdrawal',amt:23000,bal:991267,cat:'Salary',n:'509521323046 3270792'},
+  {d:'2025-04-07',type:'withdrawal',amt:10000,bal:1210167,cat:'Other',n:'C Kumar'},
+  {d:'2025-04-07',type:'withdrawal',amt:24500,bal:1184167,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-04-07',type:'withdrawal',amt:38000,bal:1144167,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-04-08',type:'withdrawal',amt:113500,bal:1048267,cat:'Other',n:'Ubin0552275'},
+  {d:'2025-04-08',type:'withdrawal',amt:49581,bal:998686,cat:'Other',n:'509815031827 5227020'},
+  {d:'2025-04-08',type:'withdrawal',amt:12000,bal:990885,cat:'Other',n:'Santhosh Kumar R'},
+  {d:'2025-04-10',type:'withdrawal',amt:50893,bal:1001692,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-04-10',type:'withdrawal',amt:5000,bal:996692,cat:'Other',n:'N K Thulasi Das'},
+  {d:'2025-04-11',type:'withdrawal',amt:41916,bal:959776,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-04-11',type:'deposit',amt:12000,bal:975776,cat:'Other',n:'Kumar E'},
+  {d:'2025-04-12',type:'withdrawal',amt:66596,bal:924705,cat:'Other',n:'Lakshana Enterprises'},
+  {d:'2025-04-15',type:'withdrawal',amt:43188,bal:916892,cat:'Other',n:'Parkplus Io'},
+  {d:'2025-04-19',type:'withdrawal',amt:40000,bal:911292,cat:'Other',n:'Lakshana Enterprises'},
+  {d:'2025-04-19',type:'withdrawal',amt:6679,bal:908613,cat:'Other',n:'Shivaleela B'},
+  {d:'2025-04-22',type:'withdrawal',amt:5000,bal:934713,cat:'Other',n:'Elite Protection Sec'},
+  {d:'2025-04-23',type:'withdrawal',amt:193050,bal:741663,cat:'Other',n:'Icic0002330'},
+  {d:'2025-04-28',type:'deposit',amt:10000,bal:859363,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-05-01',type:'withdrawal',amt:18450,bal:884438,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-05-02',type:'deposit',amt:16800,bal:958623,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-05-03',type:'withdrawal',amt:23000,bal:944423,cat:'Salary',n:'512309622480 3270792'},
+  {d:'2025-05-07',type:'withdrawal',amt:24500,bal:1189523,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-05-07',type:'withdrawal',amt:7505,bal:1182018,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-05-07',type:'withdrawal',amt:10000,bal:1172018,cat:'Other',n:'C Kumar'},
+  {d:'2025-05-07',type:'withdrawal',amt:38000,bal:1134018,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-05-07',type:'withdrawal',amt:12000,bal:1122018,cat:'Other',n:'Santhosh Kumar R'},
+  {d:'2025-05-08',type:'withdrawal',amt:6400,bal:1178718,cat:'Other',n:'Gopavarapu Gay Athri'},
+  {d:'2025-05-09',type:'withdrawal',amt:113500,bal:1078018,cat:'Other',n:'Ubin0552275'},
+  {d:'2025-05-09',type:'withdrawal',amt:49200,bal:1028818,cat:'Other',n:'512909336885 5227020'},
+  {d:'2025-05-13',type:'withdrawal',amt:43046,bal:1047397,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-05-13',type:'withdrawal',amt:49734,bal:997663,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-05-15',type:'withdrawal',amt:159300,bal:848582,cat:'Other',n:'Icic0002330'},
+  {d:'2025-05-16',type:'withdrawal',amt:10000,bal:846982,cat:'Other',n:'Sathisha M N'},
+  {d:'2025-05-26',type:'withdrawal',amt:10000,bal:987982,cat:'Other',n:'Geerish Eswarappa Sa'},
+  {d:'2025-05-26',type:'deposit',amt:10000,bal:997982,cat:'Other',n:'Avinesh B'},
+  {d:'2025-05-28',type:'deposit',amt:12600,bal:1016082,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-05-30',type:'deposit',amt:12300,bal:1063582,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-05-31',type:'deposit',amt:10000,bal:1130182,cat:'Other',n:'Sachin Malhotra'},
+  {d:'2025-05-31',type:'deposit',amt:12600,bal:1146982,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-06-03',type:'withdrawal',amt:18450,bal:1228445,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-06-04',type:'deposit',amt:12000,bal:1245745,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-06-04',type:'withdrawal',amt:23000,bal:1227345,cat:'Salary',n:'515511493629 3270792'},
+  {d:'2025-06-07',type:'withdrawal',amt:10000,bal:1409645,cat:'Other',n:'C Kumar'},
+  {d:'2025-06-07',type:'withdrawal',amt:24500,bal:1385145,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-06-07',type:'withdrawal',amt:43200,bal:1341945,cat:'Other',n:'Huchchanagouda Patil'},
+  {d:'2025-06-10',type:'withdrawal',amt:49613,bal:1405732,cat:'Other',n:'516116170159 5227020'},
+  {d:'2025-06-10',type:'withdrawal',amt:113500,bal:1292232,cat:'Other',n:'516116170448 5227020'},
+  {d:'2025-06-11',type:'withdrawal',amt:5000,bal:1314232,cat:'Other',n:'B Mayur Yadav'},
+  {d:'2025-06-11',type:'withdrawal',amt:38000,bal:1276232,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-06-11',type:'withdrawal',amt:5000,bal:1271232,cat:'Other',n:'Kalyana Chakravarthy'},
+  {d:'2025-06-11',type:'withdrawal',amt:9500,bal:1261732,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-06-12',type:'withdrawal',amt:41041,bal:1218841,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-06-12',type:'withdrawal',amt:36573,bal:1182268,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-06-14',type:'deposit',amt:10400,bal:1217568,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-06-16',type:'withdrawal',amt:10000,bal:1223968,cat:'Other',n:'Shivaleela B'},
+  {d:'2025-06-17',type:'withdrawal',amt:6000,bal:1217665,cat:'Other',n:'B Mayur Yadav'},
+  {d:'2025-06-18',type:'withdrawal',amt:160650,bal:1077815,cat:'Maintenance',n:'Rajesh KM - SML Water'},
+  {d:'2025-06-30',type:'withdrawal',amt:100000,bal:1118155,cat:'Other',n:'Lakshana Enterprises'},
+  {d:'2025-07-02',type:'deposit',amt:12600,bal:1219972,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-07-02',type:'withdrawal',amt:50000,bal:1236872,cat:'Other',n:'Shwetha R'},
+  {d:'2025-07-02',type:'deposit',amt:10400,bal:1264072,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-07-02',type:'deposit',amt:10000,bal:1296172,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-07-03',type:'withdrawal',amt:24500,bal:1432846,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-07-05',type:'withdrawal',amt:23000,bal:1452846,cat:'Salary',n:'518609870299 3270792'},
+  {d:'2025-07-08',type:'withdrawal',amt:12000,bal:1535946,cat:'Other',n:'Santhosh Kumar R'},
+  {d:'2025-07-08',type:'deposit',amt:21000,bal:1556946,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-07-09',type:'withdrawal',amt:49200,bal:1546396,cat:'Other',n:'519018175657 5227020'},
+  {d:'2025-07-09',type:'withdrawal',amt:41894,bal:1517102,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-07-10',type:'withdrawal',amt:113500,bal:1408902,cat:'Other',n:'Ubin0552275'},
+  {d:'2025-07-10',type:'withdrawal',amt:49247,bal:1359655,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-07-11',type:'withdrawal',amt:75000,bal:1292804,cat:'Other',n:'Lokamantri Enviro Pr'},
+  {d:'2025-07-11',type:'withdrawal',amt:10000,bal:1282804,cat:'Other',n:'C Kumar'},
+  {d:'2025-07-12',type:'withdrawal',amt:7975,bal:1279029,cat:'Other',n:'C Kumar'},
+  {d:'2025-07-14',type:'withdrawal',amt:193050,bal:1086479,cat:'Maintenance',n:'Rajesh KM - SAL Water'},
+  {d:'2025-07-15',type:'withdrawal',amt:43188,bal:1048491,cat:'Other',n:'Parkplus Io'},
+  {d:'2025-07-16',type:'withdrawal',amt:18450,bal:1039441,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-07-16',type:'withdrawal',amt:38000,bal:1001441,cat:'Other',n:'Krishnamurthy Kk'},
+  {d:'2025-07-16',type:'deposit',amt:10800,bal:1012241,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-07-21',type:'withdrawal',amt:8240,bal:1052901,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-07-22',type:'deposit',amt:12600,bal:1073901,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-07-25',type:'deposit',amt:16000,bal:1132053,cat:'Rent Collections',n:'Razorpay'},
+  {d:'2025-07-28',type:'withdrawal',amt:17200,bal:1154893,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-08-01',type:'withdrawal',amt:18567,bal:1204576,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-08-02',type:'withdrawal',amt:10500,bal:1237904,cat:'Other',n:'Sathish Kumar Kumar'},
+  {d:'2025-08-05',type:'deposit',amt:16400,bal:1292504,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-08-06',type:'withdrawal',amt:23000,bal:1282055,cat:'Salary',n:'521814008967 3270792'},
+  {d:'2025-08-07',type:'withdrawal',amt:18567,bal:1263118,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-08-07',type:'withdrawal',amt:24500,bal:1238618,cat:'Other',n:'Shila Chatterjee'},
+  {d:'2025-08-07',type:'withdrawal',amt:10000,bal:1228618,cat:'Other',n:'C Kumar'},
+  {d:'2025-08-07',type:'withdrawal',amt:12000,bal:1216618,cat:'Other',n:'Santhosh Kumar R'},
+  {d:'2025-08-13',type:'deposit',amt:10400,bal:1458218,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-08-13',type:'withdrawal',amt:40000,bal:1424218,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-08-13',type:'withdrawal',amt:81734,bal:1342483,cat:'Cheque Payments',n:'Cheque Payment'},
+  {d:'2025-08-13',type:'withdrawal',amt:81734,bal:1260749,cat:'Cheque Payments',n:'Cheque Payment'},
+  {d:'2025-08-13',type:'withdrawal',amt:9045,bal:1257104,cat:'Other',n:'Soma Acharya'},
+  {d:'2025-08-13',type:'withdrawal',amt:12000,bal:1245104,cat:'Other',n:'Bibek Manandhar'},
+  {d:'2025-08-15',type:'withdrawal',amt:50000,bal:1226904,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-08-16',type:'withdrawal',amt:50000,bal:1194604,cat:'Other',n:'B T Lokesha'},
+  {d:'2025-08-17',type:'deposit',amt:45800,bal:1240404,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-08-17',type:'withdrawal',amt:5000,bal:1240404,cat:'Other',n:'Jeevanantth P J'},
+  {d:'2025-08-20',type:'withdrawal',amt:46581,bal:1231623,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-08-20',type:'withdrawal',amt:51602,bal:1180021,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-08-21',type:'withdrawal',amt:158400,bal:1036321,cat:'Other',n:'Icic0002330'},
+  {d:'2025-08-21',type:'withdrawal',amt:265845,bal:710476,cat:'Other',n:'Cnrb0005910'},
+  {d:'2025-09-01',type:'deposit',amt:12600,bal:1042106,cat:'Rent Collections',n:'Cashfree'},
+  {d:'2025-09-04',type:'withdrawal',amt:23000,bal:1055142,cat:'Salary',n:'524711645206 3270792'},
+  {d:'2025-09-06',type:'deposit',amt:16800,bal:1119442,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-09-06',type:'withdrawal',amt:10000,bal:1109442,cat:'Other',n:'C Kumar'},
+  {d:'2025-09-06',type:'withdrawal',amt:24500,bal:1084942,cat:'Other',n:'Soma Acharya'},
+  {d:'2025-09-08',type:'deposit',amt:20500,bal:1147642,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-09-08',type:'withdrawal',amt:40000,bal:1107642,cat:'Other',n:'Krishnamurthy K'},
+  {d:'2025-09-09',type:'withdrawal',amt:41184,bal:1074658,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-09-09',type:'withdrawal',amt:81734,bal:992924,cat:'Cheque Payments',n:'Cheque Payment'},
+  {d:'2025-09-09',type:'withdrawal',amt:81734,bal:911190,cat:'Cheque Payments',n:'Cheque Payment'},
+  {d:'2025-09-09',type:'withdrawal',amt:107460,bal:978755,cat:'Other',n:'Cnrbo0005910'},
+  {d:'2025-09-10',type:'withdrawal',amt:55063,bal:990417,cat:'Digital Payments',n:'PhonePe Payment'},
+  {d:'2025-09-11',type:'deposit',amt:10000,bal:1026317,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-09-11',type:'withdrawal',amt:157300,bal:873217,cat:'Other',n:'525411480962 2330015'},
+  {d:'2025-09-11',type:'withdrawal',amt:8000,bal:869417,cat:'Other',n:'Panchanan Nayak'},
+  {d:'2025-09-11',type:'withdrawal',amt:18567,bal:859250,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-09-12',type:'withdrawal',amt:6700,bal:852550,cat:'Other',n:'Mallareddy Basireddy'},
+  {d:'2025-09-13',type:'withdrawal',amt:16000,bal:872750,cat:'Other',n:'Gajendra S'},
+  {d:'2025-09-15',type:'deposit',amt:31800,bal:921275,cat:'Cash Deposits',n:'Cash Deposit'},
+  {d:'2025-09-15',type:'deposit',amt:24000,bal:945275,cat:'Cash Deposits',n:'Cash Deposit'},
+  {d:'2025-09-16',type:'withdrawal',amt:17200,bal:932175,cat:'Other',n:'Prakash E'},
+  {d:'2025-09-24',type:'deposit',amt:13800,bal:1008845,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-09-25',type:'withdrawal',amt:6100,bal:1049645,cat:'Other',n:'Tilak Prasad Adikari'},
+  {d:'2025-09-29',type:'deposit',amt:16800,bal:1101445,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-09-30',type:'withdrawal',amt:18567,bal:1095678,cat:'Fuel/Purchases',n:'Fuel Purchase'},
+  {d:'2025-09-30',type:'deposit',amt:10000,bal:1105803,cat:'Rent Collections',n:'NoBroker'},
+  {d:'2025-09-30',type:'withdrawal',amt:43200,bal:1062603,cat:'Other',n:'Huchchanagouda Patil'}
+];
+
+
+const SECTIONS = [
+  {id:'overview',   label:'Overview',          icon:'\u25A3'},
+  {id:'barchart',   label:'Monthly Bars',      icon:'\u2593'},
+  {id:'monthly',    label:'Cash Flow',         icon:'\uD83D\uDCC5'},
+  {id:'heatmap',    label:'Heatmap',           icon:'\uD83D\uDD25'},
+  {id:'income',     label:'Income Sources',    icon:'\u2B06'},
+  {id:'expenses',   label:'Expenses',          icon:'\u2B07'},
+  {id:'balance',    label:'Balance Trend',     icon:'\uD83D\uDCC8'},
+  {id:'comparison', label:'Income vs Expense', icon:'\u21C5'},
+  {id:'topspends',  label:'Top Payments',      icon:'\uD83C\uDFC6'},
+  {id:'txns',       label:'Transactions',      icon:'\u2261'},
+  {id:'insights',   label:'Key Insights',      icon:'\u2605'},
+];
+
+const MONTHS_ALL = MONTHLY.map(m=>m.month);
+let selected = new Set(MONTHS_ALL);
+let txnSortCol='d', txnSortDesc=true;
+
+function fmt(n){if(n>=10000000)return'\u20B9'+((n/10000000).toFixed(2))+' Cr';if(n>=100000)return'\u20B9'+((n/100000).toFixed(2))+' L';if(n>=1000)return'\u20B9'+((n/1000).toFixed(1))+' K';return'\u20B9'+n.toLocaleString('en-IN');}
+function fmtFull(n){return'\u20B9'+Math.round(n).toLocaleString('en-IN')}
+function el(id){return document.getElementById(id)}
+function selMonthly(){return MONTHLY.filter(m=>selected.has(m.month))}
+function selTxn(){return TXN.filter(t=>selected.has(t.d.substring(0,7)))}
+function dateFmt(d){const p=d.split('-');const mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return p[2]+' '+mon[parseInt(p[1])-1]+' '+p[0].substring(2)}
+
+function renderFilterBar(){
+  let h='<span class="filter-label">Period</span>';
+  h+='<button class="filter-chip '+(selected.size===MONTHS_ALL.length?'on':'')+'" onclick="toggleAll()">All</button>';
+  MONTHLY.forEach(m=>{h+='<button class="filter-chip '+(selected.has(m.month)?'on':'')+'" onclick="toggleMonth(\''+m.month+'\')">'+m.label+'</button>';});
+  el('filterBar').innerHTML=h;
+}
+function toggleMonth(m){if(selected.has(m))selected.delete(m);else selected.add(m);if(selected.size===0)selected=new Set(MONTHS_ALL);renderAll();}
+function toggleAll(){selected=new Set(MONTHS_ALL);renderAll();}
+
+function renderHeroBalance(){
+  const ms=selMonthly();
+  const last=ms[ms.length-1];
+  const realNet=ms.reduce((s,m)=>s+m.net,0);
+  const ti=ms.reduce((s,m)=>s+m.income,0), te=ms.reduce((s,m)=>s+m.expense,0);
+  const ratio=te/ti*100;
+  const cls=ratio<60?'excellent':ratio<80?'good':ratio<95?'caution':'warning';
+  const lbl=ratio<60?'Excellent':ratio<80?'Good':ratio<95?'Caution':'Tight';
+  const trend=realNet>0?'\u2191 Growing':'\u2193 Declining';
+  el('heroCard').innerHTML=`<div class="hero-balance"><div class="hero-label">Available Account Balance</div><div class="hero-amount">${fmtFull(last.bal)}</div><div class="hero-sub">as of <b>${last.label}</b> &bull; Equitas Small Finance Bank &bull; ${trend} (${fmtFull(realNet)})</div><div class="health-badge ${cls}"><span class="health-dot" style="background:currentColor"></span>Financial Health: ${lbl} &mdash; ${(100-ratio).toFixed(0)}% retained</div></div>`;
+}
+
+function renderStats(){
+  const ms=selMonthly();
+  const ti=ms.reduce((s,m)=>s+m.income,0), te=ms.reduce((s,m)=>s+m.expense,0);
+  const realNet=ms.reduce((s,m)=>s+m.net,0);
+  const avgI=ti/ms.length, avgE=te/ms.length;
+  const sparkI=ms.map(m=>m.income), sparkE=ms.map(m=>m.expense);
+  const maxSI=Math.max(...sparkI), maxSE=Math.max(...sparkE);
+  function sparkHtml(vals,max,color){return'<div class="stat-spark">'+vals.map(v=>`<div class="stat-spark-bar" style="height:${Math.max(2,v/max*20)}px;background:${color}"></div>`).join('')+'</div>';}
+  let h='';
+  h+=`<div class="stat stat-accent" style="border-color:var(--green)"><div class="stat-v up">${fmt(ti)}</div><div class="stat-l">Total Income (OCR)</div><div class="stat-mini">${ms.length} months</div>${sparkHtml(sparkI,maxSI,'var(--green)')}</div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--red)"><div class="stat-v dn">${fmt(te)}</div><div class="stat-l">Total Expenses (OCR)</div><div class="stat-mini">${fmtFull(avgE)}/mo</div>${sparkHtml(sparkE,maxSE,'var(--red)')}</div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--teal)"><div class="stat-v tl">${fmt(realNet)}</div><div class="stat-l">Verified Net Growth</div><div class="stat-mini">From month-end balances</div></div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--accent)"><div class="stat-v">${fmt(avgI)}</div><div class="stat-l">Avg Monthly Income</div><div class="stat-mini">${fmtFull(avgI)}</div></div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--amber)"><div class="stat-v" style="color:var(--amber)">${ms.reduce((s,m)=>s+m.txns,0).toLocaleString()}</div><div class="stat-l">Total Transactions</div><div class="stat-mini">${Math.round(ms.reduce((s,m)=>s+m.txns,0)/ms.length)}/mo avg</div></div>`;
+  el('statsGrid').innerHTML=h;
+  el('overviewDesc').textContent=`Account summary for ${ms.length} months \u2014 ${ms[0].label} to ${ms[ms.length-1].label}. Net growth verified from PDF month-end balances.`;
+}
+
+function renderGauge(){
+  const ms=selMonthly();
+  const bals=ms.map(m=>m.bal);
+  const cur=bals[bals.length-1], minB=Math.min(...bals), maxB=Math.max(...bals);
+  const range=maxB-minB||1;
+  const pct=((cur-minB)/range)*100;
+  const angle=-90+pct*1.8;
+  const R=70,cx=100,cy=90;
+  let svg=`<svg class="gauge-svg" viewBox="0 0 200 120">`;
+  svg+=`<path d="M${cx-R},${cy} A${R},${R} 0 0,1 ${cx+R},${cy}" fill="none" stroke="var(--surface2)" stroke-width="14" stroke-linecap="round"/>`;
+  const dashLen=Math.PI*R;
+  const filled=dashLen*(pct/100);
+  svg+=`<path d="M${cx-R},${cy} A${R},${R} 0 0,1 ${cx+R},${cy}" fill="none" stroke="var(--teal)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${filled} ${dashLen}" opacity="0.8"/>`;
+  const needleAngle=(-180+pct*1.8)*Math.PI/180;
+  const nx=cx+55*Math.cos(needleAngle), ny=cy+55*Math.sin(needleAngle);
+  svg+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="4" fill="var(--teal)"/>`;
+  svg+=`<text x="${cx-R-5}" y="${cy+16}" text-anchor="middle" fill="var(--text3)" font-size="8">${fmt(minB)}</text>`;
+  svg+=`<text x="${cx+R+5}" y="${cy+16}" text-anchor="middle" fill="var(--text3)" font-size="8">${fmt(maxB)}</text>`;
+  svg+=`<text x="${cx}" y="${cy-20}" text-anchor="middle" fill="var(--teal)" font-size="14" font-weight="700">${fmt(cur)}</text>`;
+  svg+=`<text x="${cx}" y="${cy-6}" text-anchor="middle" fill="var(--text3)" font-size="8">CURRENT BALANCE</text>`;
+  svg+='</svg>';
+  let labels=`<div>Min: <span>${fmtFull(minB)}</span> (${ms.reduce((a,b)=>b.bal<a.bal?b:a).label})</div>`;
+  labels+=`<div>Max: <span>${fmtFull(maxB)}</span> (${ms.reduce((a,b)=>b.bal>a.bal?b:a).label})</div>`;
+  labels+=`<div>Avg: <span>${fmtFull(bals.reduce((s,b)=>s+b,0)/bals.length)}</span></div>`;
+  labels+=`<div>Range: <span>${fmtFull(maxB-minB)}</span></div>`;
+  el('gaugeArea').innerHTML=`<div class="gauge-wrap">${svg}<div class="gauge-labels">${labels}</div></div>`;
+}
+
+function renderFlowChart(){
+  const ms=selMonthly();
+  const ti=ms.reduce((s,m)=>s+m.income,0), te=ms.reduce((s,m)=>s+m.expense,0);
+  const realNet=ms.reduce((s,m)=>s+m.net,0);
+  el('flowChart').innerHTML=`
+    <div class="flow-box" style="border-color:var(--green)"><div class="fb-val" style="color:var(--green)">${fmt(ti)}</div><div class="fb-lbl">Total Inflow</div></div>
+    <div class="flow-arrow">\u2192</div>
+    <div class="flow-box" style="border-color:var(--teal)"><div class="fb-val" style="color:var(--teal)">Srimitra A/c</div><div class="fb-lbl">Equitas Bank</div></div>
+    <div class="flow-arrow">\u2192</div>
+    <div class="flow-box" style="border-color:var(--red)"><div class="fb-val" style="color:var(--red)">${fmt(te)}</div><div class="fb-lbl">Total Outflow</div></div>
+    <div class="flow-arrow">\u2192</div>
+    <div class="flow-box" style="border-color:var(--amber)"><div class="fb-val" style="color:var(--amber)">${fmt(realNet)}</div><div class="fb-lbl">Net Growth (Verified)</div></div>`;
+}
+
+function renderBarChart(){
+  const ms=selMonthly();
+  const maxV=Math.max(...ms.map(m=>Math.max(m.income,m.expense)));
+  const avgI=ms.reduce((s,m)=>s+m.income,0)/ms.length;
+  const avgPct=((avgI/maxV)*100).toFixed(0);
+  let h=`<div class="box-title">Side-by-Side Monthly Comparison</div><div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="bar-chart-wrap"><div class="bar-avg" style="bottom:${(avgI/maxV*160)}px"><span class="bar-avg-lbl">Avg Income ${fmt(avgI)}</span></div><div class="bar-row" style="grid-template-columns:repeat(${ms.length},1fr);min-width:${ms.length*70}px">`;
+  ms.forEach(m=>{
+    const hI=Math.max(3,(m.income/maxV)*160);
+    const hE=Math.max(3,(m.expense/maxV)*160);
+    h+=`<div class="bar-col"><div class="bar-area"><div class="bar-stick" style="height:${hI}px;background:var(--green)" onmouseover="showTip(event,'${m.label} Income: ${fmtFull(m.income)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--green)">${fmt(m.income)}</span></div><div class="bar-stick" style="height:${hE}px;background:var(--red)" onmouseover="showTip(event,'${m.label} Expense: ${fmtFull(m.expense)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--red)">${fmt(m.expense)}</span></div></div><div class="bar-lbl">${m.label}</div><div class="bar-sub">Net ${fmt(m.net)}</div></div>`;
+  });
+  h+='</div></div></div>';
+  el('barChartBox').innerHTML=h;
+  el('barDesc').textContent=`Green = income, Red = expense across ${ms.length} months`;
+}
+
+function renderLineChart(){
+  const ms=selMonthly();
+  const W=900,H=280,P={t:30,r:30,b:40,l:70};
+  const w=W-P.l-P.r,h=H-P.t-P.b;
+  const maxV=Math.max(...ms.map(m=>Math.max(m.income,m.expense)))*1.1;
+  const n=ms.length, xStep=n>1?w/(n-1):w/2;
+  let svg=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<5;i++){const y=P.t+h*(1-i/4);svg+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" class="grid-line"/><text x="${P.l-8}" y="${y+4}" text-anchor="end">${fmt(maxV*i/4)}</text>`;}
+  const avgI=ms.reduce((s,m)=>s+m.income,0)/n;
+  const avgY=P.t+h*(1-avgI/maxV);
+  svg+=`<line x1="${P.l}" y1="${avgY}" x2="${W-P.r}" y2="${avgY}" class="avg-line"/><text x="${W-P.r+4}" y="${avgY+4}" fill="var(--amber)" font-size="9">Avg</text>`;
+  let pathI='',pathE='';
+  ms.forEach((m,i)=>{const x=P.l+i*xStep;const yI=P.t+h*(1-m.income/maxV);const yE=P.t+h*(1-m.expense/maxV);pathI+=(i===0?'M':'L')+`${x},${yI}`;pathE+=(i===0?'M':'L')+`${x},${yE}`;svg+=`<text x="${x}" y="${H-8}" text-anchor="middle" font-size="9">${m.label}</text>`;});
+  svg+=`<path d="${pathI}" class="data-line line-income"/><path d="${pathE}" class="data-line line-expense"/>`;
+  ms.forEach((m,i)=>{const x=P.l+i*xStep;const yI=P.t+h*(1-m.income/maxV);const yE=P.t+h*(1-m.expense/maxV);svg+=`<circle cx="${x}" cy="${yI}" r="3.5" class="dot" fill="var(--green)" onmouseover="showTip(event,'${m.label}: Income ${fmtFull(m.income)}')" onmouseout="hideTip()"/><circle cx="${x}" cy="${yE}" r="3.5" class="dot" fill="var(--red)" onmouseover="showTip(event,'${m.label}: Expense ${fmtFull(m.expense)}')" onmouseout="hideTip()"/>`;});
+  svg+='</svg>';
+  el('lineChart').innerHTML=svg;
+  el('chartLegend').innerHTML='<span><span class="ldot" style="background:var(--green)"></span>Income</span><span><span class="ldot" style="background:var(--red)"></span>Expense</span><span><span class="ldot" style="background:var(--amber);border-style:dashed"></span>Avg Income</span>';
+  el('monthlyDesc').textContent=`Income vs expense trend across ${ms.length} months`;
+}
+
+function renderMonthlyTable(){
+  const ms=selMonthly();
+  let h='<table><thead><tr><th>Month</th><th class="num">Income</th><th class="num">Expense</th><th class="num">Net</th><th class="num">Balance</th><th class="num">Txns</th><th>MoM</th></tr></thead><tbody>';
+  ms.forEach((m,i)=>{
+    const prev=i>0?ms[i-1].income:m.income;
+    const pct=prev?((m.income-prev)/prev*100).toFixed(1):0;
+    const cls=pct>0?'up':pct<0?'dn':'fl';
+    h+=`<tr><td>${m.label}</td><td class="num" style="color:var(--green)">${fmtFull(m.income)}</td><td class="num" style="color:var(--red)">${fmtFull(m.expense)}</td><td class="num" style="color:${m.net>0?'var(--green)':'var(--red)'}">${fmtFull(m.net)}</td><td class="num">${fmtFull(m.bal)}</td><td class="num">${m.txns}</td><td><span class="pill ${cls}">${pct>0?'+':''}${pct}%</span></td></tr>`;
+  });
+  const ti=ms.reduce((s,m)=>s+m.income,0), te=ms.reduce((s,m)=>s+m.expense,0);
+  h+=`<tr class="tr-total"><td>Total</td><td class="num">${fmtFull(ti)}</td><td class="num">${fmtFull(te)}</td><td class="num">${fmtFull(ti-te)}</td><td class="num">\u2014</td><td class="num">${ms.reduce((s,m)=>s+m.txns,0)}</td><td></td></tr></tbody></table>`;
+  el('monthlyTable').innerHTML=h;
+}
+
+function renderHeatmap(){
+  const ms=selMonthly();
+  const months=ms.map(m=>m.month);
+  const allCats=new Set();
+  months.forEach(m=>{if(MONTHLY_CAT[m])Object.keys(MONTHLY_CAT[m]).forEach(c=>allCats.add(c))});
+  const cats=[...allCats].sort();
+  const cols=months.length+1;
+  let maxVal=0;
+  months.forEach(m=>{cats.forEach(c=>{const v=MONTHLY_CAT[m]?.[c]?.i||0;if(v>maxVal)maxVal=v;})});
+  let h=`<div class="heatmap" style="grid-template-columns:140px repeat(${months.length},1fr);min-width:${months.length*60+140}px">`;
+  h+='<div class="hm-header"></div>';
+  ms.forEach(m=>{h+=`<div class="hm-header">${m.label}</div>`});
+  cats.forEach(cat=>{
+    h+=`<div class="hm-row-label">${cat.replace(/ *\(.*\)/,'').substring(0,16)}</div>`;
+    months.forEach(m=>{
+      const v=MONTHLY_CAT[m]?.[cat]?.i||0;
+      const intensity=maxVal?v/maxVal:0;
+      const bg=v===0?'var(--surface2)':`rgba(45,212,191,${0.1+intensity*0.7})`;
+      const txtColor=intensity>0.5?'#0f1117':'var(--text2)';
+      h+=`<div class="hm-cell" style="background:${bg};color:${txtColor}" onmouseover="showTip(event,'${cat} ${ms.find(x=>x.month===m)?.label}: ${fmtFull(v)}')" onmouseout="hideTip()">${v?fmt(v):'\u2014'}</div>`;
+    });
+  });
+  h+='</div><div class="hm-legend">Low <div class="hm-legend-bar"></div> High</div>';
+  el('heatmapWrap').innerHTML=h;
+}
+
+function renderCategoryCharts(){
+  const ms=selMonthly();
+  const incFromMC={}, expFromMC={};
+  ms.forEach(m=>{
+    if(!MONTHLY_CAT[m.month])return;
+    Object.entries(MONTHLY_CAT[m.month]).forEach(([c,v])=>{
+      if(v.i>0)incFromMC[c]=(incFromMC[c]||0)+v.i;
+      if(v.e>0)expFromMC[c]=(expFromMC[c]||0)+v.e;
+    });
+  });
+  renderDonutAndBars(incFromMC,'incomeCharts','Income Distribution','Income by Category',true);
+  renderDonutAndBars(expFromMC,'expenseCharts','Expense Distribution','Expense by Category',false);
+  el('incomeDesc').textContent=`Breakdown of incoming funds for ${ms.length} selected months (balance-verified)`;
+  el('expenseDesc').textContent=`Breakdown of outgoing payments for ${ms.length} selected months (balance-verified)`;
+}
+
+function renderDonutAndBars(catMap,containerId,title1,title2,isIncome){
+  const entries=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).filter(e=>e[1]>0);
+  const total=entries.reduce((s,e)=>s+e[1],0);
+  if(!total){el(containerId).innerHTML='<div class="box"><div class="box-title">No data for selected period</div></div>';return;}
+  let h='<div class="box"><div class="box-title">'+title1+'</div>';
+  const R=70,cx=90,cy=90;
+  let svgD=`<svg width="180" height="180">`;
+  let startAngle=0;
+  entries.forEach(([c,v])=>{
+    const pct=v/total;const angle=pct*Math.PI*2;const color=CAT_COLORS[c]||'#94a3b8';
+    const x1=cx+R*Math.cos(startAngle),y1=cy+R*Math.sin(startAngle);
+    const x2=cx+R*Math.cos(startAngle+angle),y2=cy+R*Math.sin(startAngle+angle);
+    svgD+=`<path d="M${cx},${cy} L${x1},${y1} A${R},${R} 0 ${angle>Math.PI?1:0},1 ${x2},${y2} Z" fill="${color}" opacity="0.85"/>`;
+    startAngle+=angle;
+  });
+  svgD+=`<circle cx="${cx}" cy="${cy}" r="40" fill="var(--bg)"/><text x="${cx}" y="${cy-4}" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="700">${fmt(total)}</text><text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--text3)" font-size="9">TOTAL</text></svg>`;
+  h+='<div class="donut-wrap">'+svgD+'<div class="legend">';
+  entries.forEach(([c,v])=>{const color=CAT_COLORS[c]||'#94a3b8';h+=`<div class="legend-row"><span class="legend-dot" style="background:${color}"></span><span class="legend-name">${c}</span><span class="legend-val">${((v/total)*100).toFixed(1)}%</span></div>`;});
+  h+='</div></div></div>';
+  h+='<div class="box"><div class="box-title">'+title2+'</div>';
+  const maxCat=entries[0][1];
+  entries.forEach(([c,v])=>{const color=CAT_COLORS[c]||'#94a3b8';h+=`<div class="hbar-row"><div class="hbar-label">${c.replace(/ *\(.*\)/,'').substring(0,18)}</div><div class="hbar-track"><div class="hbar-fill" style="width:${(v/maxCat*100)}%;background:${color}"></div></div><div class="hbar-val">${fmt(v)}</div></div>`;});
+  h+='</div>';
+  el(containerId).innerHTML=h;
+}
+
+function renderBalanceChart(){
+  const ms=selMonthly();
+  const W=900,H=250,P={t:30,r:30,b:40,l:80};
+  const w=W-P.l-P.r,h=H-P.t-P.b;
+  const bals=ms.map(m=>m.bal), minB=Math.min(...bals)*0.9, maxB=Math.max(...bals)*1.05;
+  const range=maxB-minB||1, n=ms.length, xStep=n>1?w/(n-1):w/2;
+  let svg=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<5;i++){const y=P.t+h*(1-i/4);svg+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" class="grid-line"/><text x="${P.l-8}" y="${y+4}" text-anchor="end">${fmt(minB+range*i/4)}</text>`;}
+  let fill='',path='';
+  ms.forEach((m,i)=>{const x=P.l+i*xStep;const y=P.t+h*(1-(m.bal-minB)/range);path+=(i===0?'M':'L')+`${x},${y}`;fill+=(i===0?`M${x},${P.t+h}L${x},${y}`:`L${x},${y}`);if(i===n-1)fill+=`L${x},${P.t+h}Z`;svg+=`<text x="${x}" y="${H-8}" text-anchor="middle" font-size="9">${m.label}</text>`;});
+  svg+=`<path d="${fill}" fill="var(--teal)" opacity="0.1"/><path d="${path}" class="data-line line-balance"/>`;
+  ms.forEach((m,i)=>{const x=P.l+i*xStep;const y=P.t+h*(1-(m.bal-minB)/range);svg+=`<circle cx="${x}" cy="${y}" r="3.5" class="dot" fill="var(--teal)" onmouseover="showTip(event,'${m.label}: ${fmtFull(m.bal)}')" onmouseout="hideTip()"/>`;});
+  svg+='</svg>';
+  el('balanceChart').innerHTML=svg;
+}
+
+function renderComparison(){
+  const ms=selMonthly();
+  const bankI=ms.reduce((s,m)=>s+m.income,0), bankE=ms.reduce((s,m)=>s+m.expense,0);
+  const realNet=ms.reduce((s,m)=>s+m.net,0);
+  const committeeExp=EXPENDITURE_QUARTERLY.reduce((s,q)=>s+q.total,0);
+  let h='';
+  h+=`<div class="stat stat-accent" style="border-color:var(--green)"><div class="stat-v up">${fmt(bankI)}</div><div class="stat-l">Bank Income (OCR)</div></div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--red)"><div class="stat-v dn">${fmt(bankE)}</div><div class="stat-l">Bank Outflow (OCR)</div></div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--amber)"><div class="stat-v" style="color:var(--amber)">${fmt(committeeExp)}</div><div class="stat-l">Committee Expenditure</div></div>`;
+  el('compStats').innerHTML=h;
+
+  const expRatio=Math.min(99.9,(bankE/bankI*100)).toFixed(1);
+  const retRatio=(100-parseFloat(expRatio)).toFixed(1);
+  const acctRatio=Math.min(100,(committeeExp/bankE*100)).toFixed(1);
+  function ring(pct,color,label,value){
+    const r=40,cx=50,cy=50,circ=2*Math.PI*r;
+    const offset=circ*(1-pct/100);
+    return`<div class="ring-item"><svg width="100" height="100" viewBox="0 0 100 100"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="8"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" transform="rotate(-90 ${cx} ${cy})"/><text x="${cx}" y="${cy-2}" text-anchor="middle" fill="${color}" font-size="16" font-weight="700">${pct}%</text><text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--text3)" font-size="8">${label}</text></svg><div class="ring-label">${value}</div></div>`;
+  }
+  el('ringArea').innerHTML=`<div class="ring-wrap">${ring(retRatio,'var(--green)','Retained',fmt(realNet))}${ring(expRatio,'var(--red)','Spent',fmt(bankE))}${ring(acctRatio,'var(--amber)','Accounted',fmt(committeeExp))}</div>`;
+
+  let ih='';
+  ih+=`<div class="insight t"><div class="insight-t">Verified Account Growth</div><div class="insight-d">Account grew from \u20B97,62,023 to \u20B910,67,203 \u2014 verified net growth of ${fmtFull(realNet)} based on actual month-end balances from the bank statement.</div></div>`;
+  ih+=`<div class="insight g"><div class="insight-t">Bank vs Committee Records</div><div class="insight-d">Bank outflow ${fmtFull(bankE)} vs committee expenditure ${fmtFull(committeeExp)}. Committee records track apartment-specific expenses which are a subset of total bank outflows.</div></div>`;
+  ih+=`<div class="insight b"><div class="insight-t">Collection Performance</div><div class="insight-d">Average monthly collection of ${fmt(bankI/ms.length)} with ${ms.reduce((s,m)=>s+m.txns,0)} total transactions across ${ms.length} months.</div></div>`;
+  ih+=`<div class="insight a"><div class="insight-t">Data Source Note</div><div class="insight-d">Income/expense from OCR-scanned PDFs (96.8% balance-verified). Net growth uses reliable month-end balances directly from bank statements.</div></div>`;
+  el('compInsights').innerHTML=ih;
+}
+
+function renderTopSpends(){
+  const txns=selTxn().filter(t=>t.type==='withdrawal').sort((a,b)=>b.amt-a.amt).slice(0,10);
+  let h='';
+  txns.forEach((t,i)=>{h+=`<div class="top-card"><div class="top-rank">#${i+1}</div><div class="top-amt">${fmt(t.amt)}</div><div class="top-vendor">${t.n}</div><div class="top-detail">${dateFmt(t.d)} \u2022 ${t.cat}</div></div>`;});
+  if(!txns.length)h='<div class="box"><div class="box-title">No withdrawal transactions in selected period</div></div>';
+  el('topGrid').innerHTML=h;
+}
+
+function renderTxnTable(){
+  const q=(el('txnSearch').value||'').toLowerCase();
+  let txns=selTxn();
+  if(q)txns=txns.filter(t=>t.n.toLowerCase().includes(q)||t.d.includes(q)||String(t.amt).includes(q)||t.cat.toLowerCase().includes(q)||t.type.includes(q));
+  txns.sort((a,b)=>{
+    let va,vb;
+    if(txnSortCol==='d'){va=a.d;vb=b.d;}
+    else if(txnSortCol==='amt'){va=a.amt;vb=b.amt;}
+    else if(txnSortCol==='bal'){va=a.bal;vb=b.bal;}
+    else if(txnSortCol==='cat'){va=a.cat;vb=b.cat;}
+    else if(txnSortCol==='type'){va=a.type;vb=b.type;}
+    else{va=a.n;vb=b.n;}
+    if(va<vb)return txnSortDesc?1:-1;if(va>vb)return txnSortDesc?-1:1;return 0;
+  });
+  el('txnCount').textContent=`${txns.length} of ${selTxn().length} transactions`;
+  el('txnDesc').textContent=`${selTxn().length} significant transactions (above \u20B910K deposits / \u20B95K withdrawals) for the selected period`;
+  const cols=[{k:'d',l:'Date'},{k:'type',l:'Type'},{k:'n',l:'Narration'},{k:'cat',l:'Category'},{k:'amt',l:'Amount'},{k:'bal',l:'Balance'}];
+  let h='<table><thead><tr>';
+  cols.forEach(c=>{const sorted=txnSortCol===c.k;h+=`<th class="${c.k==='amt'||c.k==='bal'?'num ':''} ${sorted?'sorted':''}${sorted&&txnSortDesc?' desc':''}" onclick="sortTxn('${c.k}')">${c.l}</th>`;});
+  h+='</tr></thead><tbody>';
+  const show=txns.slice(0,100);
+  show.forEach(t=>{
+    const color=t.type==='deposit'?'var(--green)':t.type==='withdrawal'?'var(--red)':'var(--text3)';
+    const typeLabel=t.type==='deposit'?'\u2B06 IN':t.type==='withdrawal'?'\u2B07 OUT':'?';
+    h+=`<tr><td>${dateFmt(t.d)}</td><td><span class="pill ${t.type==='deposit'?'up':'dn'}">${typeLabel}</span></td><td>${t.n}</td><td style="font-size:10px;color:var(--text3)">${t.cat.replace(/ *\(.*\)/,'')}</td><td class="num" style="color:${color};font-weight:600">${fmtFull(t.amt)}</td><td class="num">${fmtFull(t.bal)}</td></tr>`;
+  });
+  if(txns.length>100)h+=`<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:12px">Showing 100 of ${txns.length} \u2014 use search to narrow</td></tr>`;
+  const totIn=txns.filter(t=>t.type==='deposit').reduce((s,t)=>s+t.amt,0);
+  const totOut=txns.filter(t=>t.type!=='deposit').reduce((s,t)=>s+t.amt,0);
+  h+=`<tr class="tr-total"><td>Totals</td><td></td><td></td><td></td><td class="num">${fmtFull(totIn)} in / ${fmtFull(totOut)} out</td><td class="num"></td></tr>`;
+  h+='</tbody></table>';
+  el('txnTable').innerHTML=h;
+}
+function sortTxn(col){if(txnSortCol===col)txnSortDesc=!txnSortDesc;else{txnSortCol=col;txnSortDesc=col==='amt'||col==='bal'||col==='d';}renderTxnTable();}
+
+function renderInsights(){
+  const ms=selMonthly();
+  const ti=ms.reduce((s,m)=>s+m.income,0), te=ms.reduce((s,m)=>s+m.expense,0);
+  const realNet=ms.reduce((s,m)=>s+m.net,0);
+  const maxInc=ms.reduce((a,b)=>b.income>a.income?b:a);
+  const minInc=ms.reduce((a,b)=>b.income<a.income?b:a);
+  const maxExp=ms.reduce((a,b)=>b.expense>a.expense?b:a);
+  const minExp=ms.reduce((a,b)=>b.expense<a.expense?b:a);
+  const maxBal=ms.reduce((a,b)=>b.bal>a.bal?b:a);
+  const bestGrowth=ms.reduce((a,b)=>b.net>a.net?b:a);
+  const worstMonth=ms.reduce((a,b)=>b.net<a.net?b:a);
+  const expRatio=(te/ti)*100;
+  let h='';
+  h+=`<div class="insight g"><div class="insight-t">Best Growth Month</div><div class="insight-d">${bestGrowth.label} saw the highest balance growth of ${fmtFull(bestGrowth.net)} (verified from month-end balance). Income: ${fmtFull(bestGrowth.income)}.</div></div>`;
+  h+=`<div class="insight r"><div class="insight-t">Tightest Month</div><div class="insight-d">${worstMonth.label} had a balance ${worstMonth.net<0?'decline':'change'} of ${fmtFull(worstMonth.net)}. Expenses (${fmtFull(worstMonth.expense)}) exceeded income (${fmtFull(worstMonth.income)}).</div></div>`;
+  h+=`<div class="insight t"><div class="insight-t">Peak Balance</div><div class="insight-d">Account balance peaked at ${fmtFull(maxBal.bal)} in ${maxBal.label}. Average balance: ${fmtFull(ms.reduce((s,m)=>s+m.bal,0)/ms.length)}.</div></div>`;
+  h+=`<div class="insight b"><div class="insight-t">Collection Range</div><div class="insight-d">${fmtFull(minInc.income)} (${minInc.label}) to ${fmtFull(maxInc.income)} (${maxInc.label}). Variation of ${((maxInc.income-minInc.income)/minInc.income*100).toFixed(0)}%.</div></div>`;
+  h+=`<div class="insight ${expRatio<70?'g':expRatio<90?'a':'r'}"><div class="insight-t">Expense-to-Income Ratio</div><div class="insight-d">${expRatio.toFixed(1)}% of income was spent. Verified net growth: ${fmtFull(realNet)} over ${ms.length} months.</div></div>`;
+  h+=`<div class="insight a"><div class="insight-t">OCR Data Quality</div><div class="insight-d">Data extracted via OCR from scanned bank statement PDFs. 96.8% of transactions verified by balance tracking. Month-end balances are 100% reliable.</div></div>`;
+  el('insightGrid').innerHTML=h;
+}
+
+function renderSidebar(){
+  let h='<div class="sidebar-brand">Srimitra Account</div><div class="sidebar-nav">';
+  SECTIONS.forEach(s=>{h+=`<a class="nav-link" href="#${s.id}" data-sec="${s.id}"><span class="icon">${s.icon}</span><span>${s.label}</span></a>`;});
+  h+='</div><div class="sidebar-footer"><div style="display:flex;gap:8px"><button class="sidebar-btn" onclick="toggleTheme()">Toggle Theme</button><button class="sidebar-btn" onclick="window.print()">Print / PDF</button></div>';
+  h+='<a class="sidebar-btn" href="Srimitra-expenditure.html" style="background:rgba(99,102,241,.08);border-color:var(--accent);color:var(--accent2);font-weight:600">\u2192 Expenditure Dashboard</a></div>';
+  el('sidebar').innerHTML=h;
+  let mh='';
+  SECTIONS.forEach(s=>{mh+=`<a class="mob-link" href="#${s.id}" data-sec="${s.id}"><span class="mob-icon">${s.icon}</span><span>${s.label}</span></a>`;});
+  el('mobileNav').innerHTML=mh;
+}
+
+function initScrollSpy(){
+  const links=[...document.querySelectorAll('.nav-link, .mob-link')];
+  const secs=SECTIONS.map(s=>document.getElementById(s.id)).filter(Boolean);
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)links.forEach(l=>l.classList.toggle('active',l.dataset.sec===e.target.id));});},{rootMargin:'-20% 0px -70% 0px'});
+  secs.forEach(s=>obs.observe(s));
+}
+
+function showTip(e,t){const tip=el('tooltip');tip.textContent=t;tip.style.display='block';tip.style.left=(e.pageX+10)+'px';tip.style.top=(e.pageY-30)+'px';}
+function hideTip(){el('tooltip').style.display='none';}
+function toggleTheme(){
+  const d=document.documentElement;d.dataset.theme=d.dataset.theme==='dark'?'light':'dark';
+  const mb=el('mobTheme2');if(mb)mb.textContent=d.dataset.theme==='dark'?'\u2600':'\uD83C\uDF19';
+}
+
+function renderAll(){
+  renderFilterBar();
+  renderHeroBalance();
+  renderStats();
+  renderGauge();
+  renderFlowChart();
+  renderBarChart();
+  renderLineChart();
+  renderMonthlyTable();
+  renderHeatmap();
+  renderCategoryCharts();
+  renderBalanceChart();
+  renderComparison();
+  renderTopSpends();
+  renderTxnTable();
+  renderInsights();
+  const ms=selMonthly();
+  el('headerSub').textContent=`Equitas Small Finance Bank | ${ms[0].label} \u2013 ${ms[ms.length-1].label} | ${ms.reduce((s,m)=>s+m.txns,0)} transactions`;
+}
+
+renderSidebar();
+renderAll();
+initScrollSpy();
+</script>
+</body>
+</html>
