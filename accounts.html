@@ -272,7 +272,7 @@ tbody tr:last-child td{border-bottom:none}
   <span class="mob-title">Account Statement</span>
   <div class="mob-actions">
     <button class="mob-btn" id="mobTheme2" onclick="toggleTheme()">&#9728;</button>
-    <a class="mob-btn" href="Srimitra-expenditure.html" style="text-decoration:none;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent2);border-color:var(--accent2)">&#128202; Expenditure</a>
+    <a class="mob-btn" href="Srimitra_expenditure.html" style="text-decoration:none;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent2);border-color:var(--accent2)">&#128202; Expenditure</a>
     <button class="mob-btn" onclick="window.print()">&#128196;</button>
   </div>
 </div>
@@ -936,7 +936,7 @@ function renderSidebar(){
   let h='<div class="sidebar-brand">Srimitra Account</div><div class="sidebar-nav">';
   SECTIONS.forEach(s=>{h+=`<a class="nav-link" href="#${s.id}" data-sec="${s.id}"><span class="icon">${s.icon}</span><span>${s.label}</span></a>`;});
   h+='</div><div class="sidebar-footer"><div style="display:flex;gap:8px"><button class="sidebar-btn" onclick="toggleTheme()">Toggle Theme</button><button class="sidebar-btn" onclick="window.print()">Print / PDF</button></div>';
-  h+='<a class="sidebar-btn" href="Srimitra-expenditure.html" style="background:rgba(99,102,241,.08);border-color:var(--accent);color:var(--accent2);font-weight:600">\u2192 Expenditure Dashboard</a></div>';
+  h+='<a class="sidebar-btn" href="Srimitra_expenditure.html" style="background:rgba(99,102,241,.08);border-color:var(--accent);color:var(--accent2);font-weight:600">\u2192 Expenditure Dashboard</a></div>';
   el('sidebar').innerHTML=h;
   let mh='';
   SECTIONS.forEach(s=>{mh+=`<a class="mob-link" href="#${s.id}" data-sec="${s.id}"><span class="mob-icon">${s.icon}</span><span>${s.label}</span></a>`;});
