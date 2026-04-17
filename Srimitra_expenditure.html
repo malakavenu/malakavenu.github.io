@@ -1,909 +1,1447 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Srimitra Lifestyle — Expenditure Analysis (Oct 2025 – Mar 2026)</title>
+<title>Srimitra Lifestyle — Expenditure Dashboard</title>
 <style>
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22252f;
-    --border: #2a2d3a;
-    --text: #e4e4e8;
-    --text2: #9ca3af;
-    --text3: #6b7280;
-    --accent: #6366f1;
-    --accent2: #818cf8;
-    --green: #34d399;
-    --green-bg: rgba(52,211,153,0.12);
-    --red: #f87171;
-    --red-bg: rgba(248,113,113,0.12);
-    --amber: #fbbf24;
-    --amber-bg: rgba(251,191,36,0.12);
-    --blue: #60a5fa;
-    --blue-bg: rgba(96,165,250,0.12);
-  }
+/* ═══════ THEME VARIABLES ═══════ */
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22252f; --border:#2a2d3a;
+  --text:#e4e4e8; --text2:#9ca3af; --text3:#6b7280;
+  --accent:#6366f1; --accent2:#818cf8;
+  --green:#34d399; --green-bg:rgba(52,211,153,.12);
+  --red:#f87171; --red-bg:rgba(248,113,113,.12);
+  --amber:#fbbf24; --amber-bg:rgba(251,191,36,.12);
+  --blue:#60a5fa; --blue-bg:rgba(96,165,250,.12);
+  --sidebar-w:200px;
+}
+[data-theme="light"] {
+  --bg:#f5f5f7; --surface:#fff; --surface2:#f0f0f3; --border:#e0e0e5;
+  --text:#1a1a2e; --text2:#555; --text3:#888;
+  --green-bg:rgba(16,185,129,.1); --red-bg:rgba(239,68,68,.1);
+  --amber-bg:rgba(245,158,11,.1); --blue-bg:rgba(59,130,246,.1);
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ═══════ RESET & BASE ═══════ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;display:flex;min-height:100vh;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    min-height: 100vh;
-  }
+/* ═══════ SIDEBAR ═══════ */
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-brand{padding:20px 16px 12px;font-size:14px;font-weight:700;color:var(--accent2);border-bottom:1px solid var(--border);letter-spacing:.3px}
+.sidebar-nav{flex:1;padding:8px 0}
+.nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:12px;color:var(--text2);text-decoration:none;border-left:3px solid transparent;transition:all .15s}
+.nav-link:hover{color:var(--text);background:rgba(99,102,241,.06)}
+.nav-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(99,102,241,.08);font-weight:600}
+.nav-link .icon{width:18px;text-align:center;font-size:14px;flex-shrink:0}
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+.sidebar-btn{flex:1;padding:8px 0;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;text-align:center;transition:all .15s}
+.sidebar-btn:hover{border-color:var(--accent);color:var(--text)}
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+/* ═══════ MAIN ═══════ */
+.main{margin-left:var(--sidebar-w);flex:1;padding:24px 32px 60px;max-width:1100px}
 
-  /* Header */
-  .header { margin-bottom: 32px; }
-  .header h1 {
-    font-size: 28px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #e4e4e8, #818cf8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
-  }
-  .header p { color: var(--text2); font-size: 14px; }
+/* ═══════ HEADER ═══════ */
+.header{margin-bottom:8px}
+.header h1{font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--text),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
+.header-sub{color:var(--text2);font-size:13px}
 
-  /* Stat Cards */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-  }
-  .stat-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--accent2);
-  }
-  .stat-value.up { color: var(--red); }
-  .stat-value.neutral { color: var(--text); }
-  .stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text3);
-    margin-top: 6px;
-  }
+/* ═══════ QUARTER FILTER ═══════ */
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 24px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;align-items:center}
+.filter-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-right:8px;flex-shrink:0}
+.filter-chip{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.filter-chip:hover{border-color:var(--accent);color:var(--text)}
+.filter-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 
-  /* Tabs */
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-  .tab {
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text2);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .tab:hover { border-color: var(--accent); color: var(--text); }
-  .tab.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-  }
+/* ═══════ SECTION ═══════ */
+section{margin-bottom:40px;scroll-margin-top:20px}
+.sec-title{font-size:17px;font-weight:600;margin-bottom:4px}
+.sec-desc{font-size:12px;color:var(--text3);margin-bottom:14px}
 
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
+/* ═══════ STATS ═══════ */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.stat-v{font-size:22px;font-weight:700;color:var(--accent2)}
+.stats-4{grid-template-columns:repeat(4,1fr)}
+.stats-3{grid-template-columns:repeat(3,1fr)}
+.stat-v.up{color:var(--red)} .stat-v.dn{color:var(--green)} .stat-v.n{color:var(--text)}
+.stat-l{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);margin-top:4px}
 
-  /* Section */
-  h2 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  h3 {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text2);
-    margin: 20px 0 8px 0;
-  }
-  .section-desc {
-    font-size: 13px;
-    color: var(--text3);
-    margin-bottom: 16px;
-  }
+/* ═══════ CHART CONTAINERS ═══════ */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.box-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px}
 
-  /* Charts */
-  .chart-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 28px;
-  }
-  .chart-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .chart-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text2);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+/* ═══════ BARS ═══════ */
+.spark-row{display:grid;gap:10px;margin:12px 0}
+.spark-col{text-align:center}
+.spark-area{height:120px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px}
+.spark-bar{width:36px;border-radius:5px 5px 0 0;position:relative;transition:height .4s}
+.spark-bar .sv{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;white-space:nowrap}
+.spark-lbl{font-size:11px;font-weight:600}
+.spark-sub{font-size:9px;color:var(--text3)}
 
-  /* Donut */
-  .donut-wrap {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-  .donut-center {
-    font-size: 18px;
-    font-weight: 700;
-    fill: var(--text);
-  }
-  .donut-sub {
-    font-size: 10px;
-    fill: var(--text3);
-  }
-  .legend { font-size: 12px; }
-  .legend-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 3px 0;
-    cursor: default;
-  }
-  .legend-row:hover { opacity: 0.8; }
-  .legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
-    flex-shrink: 0;
-  }
-  .legend-name { flex: 1; color: var(--text2); }
-  .legend-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+.hbar-row{display:flex;align-items:center;margin-bottom:7px}
+.hbar-label{width:110px;font-size:11px;color:var(--text2);text-align:right;padding-right:10px;flex-shrink:0}
+.hbar-track{flex:1;height:10px;background:var(--surface2);border-radius:5px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:5px;transition:width .5s}
+.hbar-val{width:70px;font-size:11px;font-weight:600;text-align:right;padding-left:8px;flex-shrink:0;font-variant-numeric:tabular-nums}
 
-  /* Bar Chart */
-  .hbar { margin: 6px 0; }
-  .hbar-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .hbar-label {
-    width: 160px;
-    font-size: 12px;
-    color: var(--text2);
-    text-align: right;
-    padding-right: 12px;
-    flex-shrink: 0;
-  }
-  .hbar-track {
-    flex: 1;
-    height: 12px;
-    background: var(--surface2);
-    border-radius: 6px;
-    overflow: hidden;
-    position: relative;
-  }
-  .hbar-fill {
-    height: 100%;
-    border-radius: 6px;
-    transition: width 0.6s ease;
-  }
-  .hbar-val {
-    width: 70px;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: right;
-    padding-left: 10px;
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-  }
+/* ═══════ TABLE ═══════ */
+.tw{overflow-x:auto;border-radius:10px;border:1px solid var(--border);margin:8px 0 16px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{background:var(--surface2);color:var(--text2);padding:9px 10px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+thead th:hover{color:var(--text)}
+thead th.sorted{color:var(--accent2)}
+thead th.sorted::after{content:" \u25B2";font-size:8px}
+thead th.sorted.desc::after{content:" \u25BC"}
+tbody td{padding:8px 10px;border-bottom:1px solid var(--border)}
+tbody tr:hover{background:rgba(99,102,241,.06)}
+tbody tr:last-child td{border-bottom:none}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.tr-total td{font-weight:700;background:rgba(99,102,241,.1)!important;border-top:2px solid var(--accent)}
 
-  /* Grouped bar */
-  .gbar-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .gbar-label {
-    width: 170px;
-    font-size: 11px;
-    color: var(--text2);
-    text-align: right;
-    padding-right: 12px;
-    flex-shrink: 0;
-  }
-  .gbar-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-  .gbar-track {
-    height: 10px;
-    background: var(--surface2);
-    border-radius: 5px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-  }
-  .gbar-fill {
-    height: 100%;
-    border-radius: 5px;
-    transition: width 0.6s ease;
-  }
-  .gbar-val {
-    width: 70px;
-    font-size: 11px;
-    font-weight: 600;
-    text-align: right;
-    padding-left: 10px;
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-    color: var(--text2);
-  }
+/* ═══════ PILLS ═══════ */
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:9px;font-weight:700}
+.pill.up{background:var(--red-bg);color:var(--red)}
+.pill.dn{background:var(--green-bg);color:var(--green)}
+.pill.fl{background:rgba(107,114,128,.15);color:var(--text3)}
+.pill.warn{background:var(--amber-bg);color:var(--amber)}
+.cat-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
 
-  /* Spark bars */
-  .spark-row {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 12px;
-    margin: 16px 0;
-  }
-  .spark-col { text-align: center; }
-  .spark-bar-area {
-    height: 130px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-  .spark-bar {
-    width: 40px;
-    border-radius: 6px 6px 0 0;
-    position: relative;
-    transition: height 0.5s ease;
-  }
-  .spark-bar .sv {
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-  .spark-month { font-size: 13px; font-weight: 600; }
-  .spark-year { font-size: 11px; color: var(--text3); }
+/* ═══════ INSIGHTS ═══════ */
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.insight{padding:12px;border-radius:8px;border-left:3px solid}
+.insight.g{background:var(--green-bg);border-color:var(--green)}
+.insight.r{background:var(--red-bg);border-color:var(--red)}
+.insight.a{background:var(--amber-bg);border-color:var(--amber)}
+.insight.b{background:var(--blue-bg);border-color:var(--blue)}
+.insight-t{font-weight:700;font-size:12px;margin-bottom:3px}
+.insight-d{font-size:11px;color:var(--text2);line-height:1.35}
 
-  /* Table */
-  .table-wrap {
-    overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    margin: 12px 0 20px 0;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-  thead th {
-    background: var(--surface2);
-    color: var(--text2);
-    padding: 12px 14px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-  }
-  tbody td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  tbody tr:hover { background: rgba(99,102,241,0.06); }
-  tbody tr:last-child td { border-bottom: none; }
-  .num { text-align: right; font-variant-numeric: tabular-nums; }
-  .total-row td {
-    font-weight: 700;
-    background: rgba(99,102,241,0.1) !important;
-    border-top: 2px solid var(--accent);
-  }
+/* ═══════ SEARCH ═══════ */
+.search-bar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.search-input{flex:1;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;outline:none}
+.search-input:focus{border-color:var(--accent)}
+.search-count{font-size:11px;color:var(--text3);white-space:nowrap}
 
-  /* Pills */
-  .pill {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .pill.up { background: var(--red-bg); color: var(--red); }
-  .pill.down { background: var(--green-bg); color: var(--green); }
-  .pill.flat { background: rgba(107,114,128,0.15); color: var(--text3); }
-  .pill.warn { background: var(--amber-bg); color: var(--amber); }
+/* ═══════ LINE CHART ═══════ */
+.line-chart{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.line-chart svg{width:100%;height:auto}
+.line-chart text{fill:var(--text2);font-size:10px}
+.line-chart .grid-line{stroke:var(--border);stroke-width:1}
+.line-chart .data-line{fill:none;stroke:var(--accent2);stroke-width:2.5}
+.line-chart .avg-line{stroke:var(--amber);stroke-width:1.5;stroke-dasharray:6 4}
+.line-chart .dot{fill:var(--accent2);cursor:pointer}
+.line-chart .dot:hover{r:5;fill:var(--accent)}
+.chart-tooltip{position:absolute;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;pointer-events:none;z-index:50;display:none;white-space:nowrap}
 
-  /* Insight cards */
-  .insight-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin: 16px 0;
-  }
-  .insight {
-    padding: 16px;
-    border-radius: 10px;
-    border-left: 4px solid;
-  }
-  .insight.g { background: var(--green-bg); border-color: var(--green); }
-  .insight.r { background: var(--red-bg); border-color: var(--red); }
-  .insight.a { background: var(--amber-bg); border-color: var(--amber); }
-  .insight.b { background: var(--blue-bg); border-color: var(--blue); }
-  .insight-t { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-  .insight-d { font-size: 12px; color: var(--text2); line-height: 1.4; }
+/* ═══════ ENHANCED STAT CARDS ═══════ */
+.stat-accent{border-top:3px solid var(--accent)}
+.stat-accent.water{border-color:#3b82f6} .stat-accent.sec{border-color:#8b5cf6}
+.stat-accent.elec{border-color:#f59e0b} .stat-accent.burn{border-color:var(--red)}
+.stat-mini{font-size:10px;color:var(--text3);margin-top:2px}
 
-  /* Vendor cards */
-  .vendor-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin: 16px 0;
-  }
-  .vcard {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    transition: border-color 0.2s;
-  }
-  .vcard:hover { border-color: var(--accent); }
-  .vcard-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
-  .vcard-svc { font-size: 11px; color: var(--text3); margin-bottom: 10px; }
-  .vcard-amt { font-size: 22px; font-weight: 700; color: var(--accent2); }
-  .vcard-detail { font-size: 11px; color: var(--text2); margin-top: 4px; }
+/* ═══════ HEATMAP ═══════ */
+.heatmap{display:grid;gap:2px;margin:12px 0}
+.hm-cell{border-radius:4px;padding:4px 2px;text-align:center;font-size:9px;font-weight:600;transition:transform .15s;cursor:default;min-height:28px;display:flex;align-items:center;justify-content:center}
+.hm-cell:hover{transform:scale(1.15);z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hm-header{font-size:9px;color:var(--text3);text-align:center;font-weight:600;padding:4px 2px}
+.hm-row-label{font-size:10px;color:var(--text2);text-align:right;padding-right:6px;display:flex;align-items:center;justify-content:flex-end}
+.hm-legend{display:flex;align-items:center;gap:4px;justify-content:center;margin-top:8px;font-size:9px;color:var(--text3)}
+.hm-legend-bar{height:8px;border-radius:4px;width:120px;background:linear-gradient(90deg,var(--surface2),var(--accent))}
 
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 24px 0;
-  }
+/* ═══════ TOP PAYMENT CARDS ═══════ */
+.top-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
+.top-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 12px;position:relative;overflow:hidden;transition:border-color .15s}
+.top-card:hover{border-color:var(--accent)}
+.top-rank{position:absolute;top:8px;right:10px;font-size:20px;font-weight:800;color:var(--border);line-height:1}
+.top-amt{font-size:18px;font-weight:700;color:var(--accent2);margin-bottom:2px}
+.top-vendor{font-size:11px;font-weight:600;margin-bottom:1px}
+.top-detail{font-size:9px;color:var(--text3)}
 
-  /* Footer */
-  .footer {
-    text-align: center;
-    padding: 20px 0;
-    font-size: 11px;
-    color: var(--text3);
-    border-top: 1px solid var(--border);
-    margin-top: 32px;
-  }
+/* ═══════ ONE-TIME vs RECURRING ═══════ */
+.split-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;margin:8px 0 16px}
+.split-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;transition:width .4s}
+.ot-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;transition:border-color .15s}
+.ot-card:hover{border-color:var(--accent)}
+.ot-left{display:flex;align-items:center;gap:10px}
+.ot-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ot-name{font-size:12px;font-weight:600}
+.ot-meta{font-size:10px;color:var(--text3)}
+.ot-amount{font-size:15px;font-weight:700;text-align:right}
 
-  /* Tooltip */
-  .tooltip-host { position: relative; }
-  .tooltip-host:hover .tooltip { display: block; }
-  .tooltip {
-    display: none;
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 10;
-    pointer-events: none;
-  }
+/* ═══════ MONTH BAR CHART ═══════ */
+.month-bar-wrap{position:relative}
+.month-avg-line{position:absolute;left:0;right:0;border-top:2px dashed var(--amber);z-index:1}
+.month-avg-label{position:absolute;right:0;font-size:9px;color:var(--amber);transform:translateY(-14px)}
 
-  /* Responsive */
-  @media (max-width: 768px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .chart-grid { grid-template-columns: 1fr; }
-    .vendor-grid { grid-template-columns: repeat(2, 1fr); }
-    .insight-grid { grid-template-columns: 1fr; }
-    .spark-row { grid-template-columns: repeat(3, 1fr); }
-    .hbar-label, .gbar-label { width: 100px; font-size: 10px; }
-  }
-  @media (max-width: 480px) {
-    .stats-grid { grid-template-columns: 1fr; }
-    .vendor-grid { grid-template-columns: 1fr; }
-    .spark-row { grid-template-columns: repeat(2, 1fr); }
-    .container { padding: 16px; }
-  }
+/* ═══════ DONUT ═══════ */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.legend{font-size:11px}
+.legend-row{display:flex;align-items:center;gap:6px;padding:2px 0}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.legend-name{flex:1;color:var(--text2)}
+.legend-val{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ═══════ FOOTER ═══════ */
+.footer{text-align:center;padding:16px 0;font-size:10px;color:var(--text3);border-top:1px solid var(--border);margin-top:32px}
+
+/* ═══════ MOBILE BOTTOM NAV ═══════ */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:200;padding:4px 0 max(4px,env(safe-area-inset-bottom))}
+.mobile-nav-inner{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:2px;padding:0 4px}
+.mobile-nav-inner::-webkit-scrollbar{display:none}
+.mob-link{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 10px;font-size:9px;color:var(--text3);text-decoration:none;border-radius:8px;min-width:56px;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.mob-link.active{color:var(--accent2);background:rgba(99,102,241,.1)}
+.mob-link .mob-icon{font-size:16px}
+.mob-link span:last-child{white-space:nowrap}
+
+/* ═══════ MOBILE TOOLBAR ═══════ */
+.mobile-toolbar{display:none;position:fixed;top:0;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:200;padding:8px 12px;align-items:center;justify-content:space-between}
+.mob-title{font-size:14px;font-weight:700;color:var(--accent2)}
+.mob-actions{display:flex;gap:6px}
+.mob-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+
+/* ═══════ RESPONSIVE: TABLET ═══════ */
+@media(max-width:900px){
+  .sidebar{width:60px} .sidebar-brand,.nav-link span:not(.icon){display:none} .nav-link{justify-content:center;padding:12px 0} .main{margin-left:60px;padding:16px}
+  .stats{grid-template-columns:repeat(2,1fr)} .grid2{grid-template-columns:1fr} .insight-grid{grid-template-columns:1fr}
+  .top-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ═══════ RESPONSIVE: MOBILE ═══════ */
+@media(max-width:768px){
+  .sidebar{display:none!important;width:0!important;visibility:hidden!important}
+  .mobile-nav{display:block!important}
+  .mobile-toolbar{display:flex!important}
+  .main{margin-left:0!important;padding:52px 12px 68px 12px!important;max-width:100%!important}
+  .header{display:none!important}
+
+  .stats,.stats-4,.stats-3{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .stat{padding:12px 10px}
+  .stat-v{font-size:18px}
+  .stat-l{font-size:8px;letter-spacing:.8px}
+  .stat-mini{font-size:9px}
+
+  .filter-bar{padding:8px;gap:4px;margin:8px 0 16px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-chip{padding:8px 14px;font-size:12px;flex-shrink:0}
+  .filter-label{display:none}
+
+  .sec-title{font-size:16px}
+  .sec-desc{font-size:11px}
+  section{margin-bottom:24px}
+
+  .grid2{gap:10px}
+  .box{padding:12px;border-radius:8px}
+  .box-title{font-size:10px;margin-bottom:8px}
+
+  .top-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .top-card{padding:10px 8px}
+  .top-amt{font-size:15px}
+  .top-rank{font-size:16px}
+  .top-vendor{font-size:10px}
+
+  .search-input{padding:12px 14px;font-size:14px;border-radius:10px}
+  .search-count{font-size:10px}
+
+  .hbar-label{width:65px;font-size:10px}
+  .hbar-val{width:60px;font-size:10px}
+
+  .ot-card{padding:10px;gap:6px;border-radius:8px}
+  .ot-name{font-size:11px}
+  .ot-meta{font-size:9px}
+  .ot-amount{font-size:13px}
+  .ot-icon{width:28px;height:28px;border-radius:6px}
+
+  table{font-size:10px}
+  thead th{padding:8px 6px;font-size:9px}
+  tbody td{padding:7px 6px}
+  .tw{border-radius:8px}
+
+  .donut-wrap{flex-direction:column;gap:12px;align-items:center}
+  .donut-wrap svg{width:160px;height:160px}
+  .legend{width:100%}
+
+  .insight-grid{gap:8px}
+  .insight{padding:10px;border-radius:6px}
+  .insight-t{font-size:11px}
+  .insight-d{font-size:10px}
+
+  .heatmap{overflow:visible}
+  .hm-cell{font-size:7px;min-height:24px;padding:3px 2px;min-width:40px}
+  .hm-row-label{font-size:9px;padding-right:4px;min-width:70px;flex-shrink:0}
+  .hm-header{font-size:8px;min-width:40px}
+
+  .spark-bar{width:18px}
+  .spark-bar .sv{font-size:7px!important;top:-14px}
+  .spark-lbl{font-size:8px}
+  .spark-sub{font-size:8px}
+  .spark-area{height:100px!important}
+
+  .split-bar{height:28px;border-radius:6px}
+  .split-seg{font-size:10px}
+
+  .line-chart{padding:10px}
+  .line-chart text{font-size:8px}
+
+  .chart-tooltip{font-size:10px;padding:8px 12px}
+}
+
+/* ═══════ PRINT ═══════ */
+@media print{
+  .sidebar,.filter-bar,.search-bar,.sidebar-footer,.mobile-nav,.mobile-toolbar{display:none!important}
+  .main{margin-left:0!important;padding:10px!important;max-width:100%!important}
+  .header{display:block!important}
+  body{background:#fff;color:#111}
+  .box,.stat,.tw{break-inside:avoid}
+  section{break-before:auto}
+  @page{size:A4;margin:14mm}
+}
 </style>
 </head>
 <body>
 
-<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <h1>Srimitra Lifestyle — Expenditure Analysis</h1>
-    <p>Oct 2025 – Mar 2026 &nbsp;|&nbsp; Q4 FY25 vs Q1 FY26</p>
-  </div>
-
-  <!-- Stats -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value">&#8377;22.24L</div>
-      <div class="stat-label">Q4 2025 (Oct–Dec)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">&#8377;25.73L</div>
-      <div class="stat-label">Q1 2026 (Jan–Mar)</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value up">+15.7%</div>
-      <div class="stat-label">Quarter Change</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value neutral">&#8377;7.99L</div>
-      <div class="stat-label">Monthly Average</div>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="overview">Category Overview</button>
-    <button class="tab" data-tab="monthly">Monthly Trend</button>
-    <button class="tab" data-tab="vendors">Top Vendors</button>
-    <button class="tab" data-tab="onetime">One-time Expenses</button>
-    <button class="tab" data-tab="insights">Key Insights</button>
-  </div>
-
-  <!-- ═══ TAB 1: OVERVIEW ═══ -->
-  <div class="tab-panel active" id="panel-overview">
-    <div class="chart-grid">
-      <div class="chart-box">
-        <div class="chart-title">Spending Distribution (6 Months)</div>
-        <div class="donut-wrap">
-          <svg width="200" height="200" viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#2a2d3a" stroke-width="28"/>
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#3b82f6" stroke-width="28"
-                    stroke-dasharray="160 503" stroke-dashoffset="125.7" transform="rotate(-90 100 100)"/>
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#8b5cf6" stroke-width="28"
-                    stroke-dasharray="104 503" stroke-dashoffset="-34.3" transform="rotate(-90 100 100)"/>
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#f59e0b" stroke-width="28"
-                    stroke-dasharray="61.4 503" stroke-dashoffset="-138.3" transform="rotate(-90 100 100)"/>
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#10b981" stroke-width="28"
-                    stroke-dasharray="26.2 503" stroke-dashoffset="-199.7" transform="rotate(-90 100 100)"/>
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#ef4444" stroke-width="28"
-                    stroke-dasharray="25.2 503" stroke-dashoffset="-225.9" transform="rotate(-90 100 100)"/>
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#6b7280" stroke-width="28"
-                    stroke-dasharray="126 503" stroke-dashoffset="-251.1" transform="rotate(-90 100 100)"/>
-            <circle cx="100" cy="100" r="58" fill="var(--surface)"/>
-            <text x="100" y="96" text-anchor="middle" class="donut-center">&#8377;47.97L</text>
-            <text x="100" y="114" text-anchor="middle" class="donut-sub">TOTAL</text>
-          </svg>
-          <div class="legend">
-            <div class="legend-row"><span class="legend-dot" style="background:#3b82f6"></span><span class="legend-name">Water Supply</span><span class="legend-val">31.8%</span></div>
-            <div class="legend-row"><span class="legend-dot" style="background:#8b5cf6"></span><span class="legend-name">Security & HK</span><span class="legend-val">20.7%</span></div>
-            <div class="legend-row"><span class="legend-dot" style="background:#f59e0b"></span><span class="legend-name">Electricity</span><span class="legend-val">12.2%</span></div>
-            <div class="legend-row"><span class="legend-dot" style="background:#10b981"></span><span class="legend-name">STP & WTP</span><span class="legend-val">5.2%</span></div>
-            <div class="legend-row"><span class="legend-dot" style="background:#ef4444"></span><span class="legend-name">Plumbing</span><span class="legend-val">5.0%</span></div>
-            <div class="legend-row"><span class="legend-dot" style="background:#6b7280"></span><span class="legend-name">All Others</span><span class="legend-val">25.1%</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="chart-box">
-        <div class="chart-title">Top 3 — Where the Money Goes</div>
-        <div style="display:flex;flex-direction:column;gap:20px;padding-top:8px">
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:13px;font-weight:600">Water Supply</span>
-              <span style="font-size:13px;font-weight:700;color:#3b82f6">&#8377;15.23L</span>
-            </div>
-            <div class="hbar-track"><div class="hbar-fill" style="width:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:6px"></div></div>
-            <div style="font-size:11px;color:var(--text3);margin-top:4px">2 tanker vendors + pool water | Q4: ₹7.39L → Q1: ₹7.84L (+6.1%)</div>
-          </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:13px;font-weight:600">Security & Housekeeping</span>
-              <span style="font-size:13px;font-weight:700;color:#8b5cf6">&#8377;9.94L</span>
-            </div>
-            <div class="hbar-track"><div class="hbar-fill" style="width:65%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);border-radius:6px"></div></div>
-            <div style="font-size:11px;color:var(--text3);margin-top:4px">Elite Protection Security Services | Q4: ₹5.01L → Q1: ₹4.93L (-1.6%)</div>
-          </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="font-size:13px;font-weight:600">Electricity (BESCOM)</span>
-              <span style="font-size:13px;font-weight:700;color:#f59e0b">&#8377;5.83L</span>
-            </div>
-            <div class="hbar-track"><div class="hbar-fill" style="width:38%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:6px"></div></div>
-            <div style="font-size:11px;color:var(--text3);margin-top:4px">2 BESCOM meters for common areas | Q4: ₹2.89L → Q1: ₹2.94L (+1.7%)</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h2>Quarter Comparison — All Categories</h2>
-    <p class="section-desc">Q4 2025 (lighter) vs Q1 2026 (brighter). Categories sorted by total spend.</p>
-
-    <div style="margin:12px 0 6px 0">
-      <div class="gbar-row"><div class="gbar-label">Water Supply</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:74%;background:#3b82f6;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:79%;background:#3b82f6"></div></div></div><div class="gbar-val">₹15.23L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Security & HK</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:50%;background:#8b5cf6;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:49%;background:#8b5cf6"></div></div></div><div class="gbar-val">₹9.94L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Electricity</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:29%;background:#f59e0b;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:30%;background:#f59e0b"></div></div></div><div class="gbar-val">₹5.83L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Others & One-time</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:6%;background:#6b7280;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:27%;background:#6b7280"></div></div></div><div class="gbar-val">₹3.27L</div></div>
-      <div class="gbar-row"><div class="gbar-label">STP & WTP</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:12%;background:#10b981;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:13%;background:#10b981"></div></div></div><div class="gbar-val">₹2.48L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Plumbing</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:12%;background:#ef4444;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:12%;background:#ef4444"></div></div></div><div class="gbar-val">₹2.39L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Fogging & Garden</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:7%;background:#14b8a6;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:7%;background:#14b8a6"></div></div></div><div class="gbar-val">₹1.47L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Salary</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:7%;background:#64748b;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:7%;background:#64748b"></div></div></div><div class="gbar-val">₹1.38L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Generator & Fuel</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:4%;background:#dc2626;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:10%;background:#dc2626"></div></div></div><div class="gbar-val">₹1.32L</div></div>
-      <div class="gbar-row"><div class="gbar-label">Lift Maintenance</div><div class="gbar-bars"><div class="gbar-track"><div class="gbar-fill" style="width:7%;background:#78716c;opacity:0.5"></div></div><div class="gbar-track"><div class="gbar-fill" style="width:4%;background:#78716c"></div></div></div><div class="gbar-val">₹1.09L</div></div>
-    </div>
-    <div style="display:flex;gap:20px;justify-content:center;font-size:11px;color:var(--text3);">
-      <span><span style="display:inline-block;width:16px;height:6px;background:var(--accent);opacity:0.4;border-radius:3px;vertical-align:middle;margin-right:5px"></span>Q4 2025</span>
-      <span><span style="display:inline-block;width:16px;height:6px;background:var(--accent);border-radius:3px;vertical-align:middle;margin-right:5px"></span>Q1 2026</span>
-    </div>
-
-    <div class="divider"></div>
-
-    <h2>Full Breakdown Table</h2>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Category</th><th>Type</th><th class="num">Q4 2025</th><th class="num">Q1 2026</th><th class="num">Total</th><th class="num">Change</th><th class="num">Share</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Water Supply</strong></td><td>Contract</td><td class="num">₹7,38,815</td><td class="num">₹7,84,140</td><td class="num">₹15,22,955</td><td class="num"><span class="pill warn">+6.1%</span></td><td class="num">31.8%</td></tr>
-          <tr><td><strong>Security & HK</strong></td><td>Contract</td><td class="num">₹5,00,678</td><td class="num">₹4,92,909</td><td class="num">₹9,93,587</td><td class="num"><span class="pill down">-1.6%</span></td><td class="num">20.7%</td></tr>
-          <tr><td><strong>Electricity</strong></td><td>Utility</td><td class="num">₹2,89,007</td><td class="num">₹2,94,004</td><td class="num">₹5,83,011</td><td class="num"><span class="pill flat">+1.7%</span></td><td class="num">12.2%</td></tr>
-          <tr><td><strong>STP & WTP</strong></td><td>Contract</td><td class="num">₹1,20,000</td><td class="num">₹1,27,750</td><td class="num">₹2,47,750</td><td class="num"><span class="pill warn">+6.5%</span></td><td class="num">5.2%</td></tr>
-          <tr><td><strong>Plumbing</strong></td><td>Purchase</td><td class="num">₹1,15,920</td><td class="num">₹1,22,880</td><td class="num">₹2,38,800</td><td class="num"><span class="pill warn">+6.0%</span></td><td class="num">5.0%</td></tr>
-          <tr><td><strong>Generator & Fuel</strong></td><td>Purchase</td><td class="num">₹36,802</td><td class="num">₹95,346</td><td class="num">₹1,32,148</td><td class="num"><span class="pill up">+159%</span></td><td class="num">2.8%</td></tr>
-          <tr><td><strong>Fogging & Garden</strong></td><td>Contract</td><td class="num">₹73,500</td><td class="num">₹73,500</td><td class="num">₹1,47,000</td><td class="num"><span class="pill flat">0%</span></td><td class="num">3.1%</td></tr>
-          <tr><td><strong>Salary</strong></td><td>Salary</td><td class="num">₹69,000</td><td class="num">₹69,000</td><td class="num">₹1,38,000</td><td class="num"><span class="pill flat">0%</span></td><td class="num">2.9%</td></tr>
-          <tr><td><strong>Lift Maint.</strong></td><td>Contract</td><td class="num">₹66,269</td><td class="num">₹43,200</td><td class="num">₹1,09,469</td><td class="num"><span class="pill down">-34.8%</span></td><td class="num">2.3%</td></tr>
-          <tr><td><strong>Barriers/ParkPlus</strong></td><td>Contract</td><td class="num">₹43,188</td><td class="num">₹57,466</td><td class="num">₹1,00,654</td><td class="num"><span class="pill up">+33.1%</span></td><td class="num">2.1%</td></tr>
-          <tr><td><strong>BBMP Garbage</strong></td><td>Contract</td><td class="num">₹48,000</td><td class="num">₹48,000</td><td class="num">₹96,000</td><td class="num"><span class="pill flat">0%</span></td><td class="num">2.0%</td></tr>
-          <tr><td><strong>Salt for Softner</strong></td><td>Purchase</td><td class="num">₹30,000</td><td class="num">₹60,000</td><td class="num">₹90,000</td><td class="num"><span class="pill up">+100%</span></td><td class="num">1.9%</td></tr>
-          <tr><td><strong>Swimming Pool</strong></td><td>Contract</td><td class="num">₹31,925</td><td class="num">₹38,934</td><td class="num">₹70,859</td><td class="num"><span class="pill warn">+22%</span></td><td class="num">1.5%</td></tr>
-          <tr><td><strong>Others</strong></td><td>Misc</td><td class="num">₹60,441</td><td class="num">₹2,66,310</td><td class="num">₹3,26,751</td><td class="num"><span class="pill up">+340%</span></td><td class="num">6.8%</td></tr>
-          <tr class="total-row"><td colspan="2"><strong>GRAND TOTAL</strong></td><td class="num"><strong>₹22,23,545</strong></td><td class="num"><strong>₹25,73,439</strong></td><td class="num"><strong>₹47,96,984</strong></td><td class="num"><span class="pill warn">+15.7%</span></td><td class="num">100%</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ═══ TAB 2: MONTHLY ═══ -->
-  <div class="tab-panel" id="panel-monthly">
-    <h2>Monthly Expenditure Trend</h2>
-    <p class="section-desc">Month-by-month spending from Oct 2025 to Mar 2026. March 2026 was the highest month driven by STP rework and bulk purchases.</p>
-
-    <div class="chart-box" style="margin:16px 0">
-      <div class="chart-title">Monthly Spend (in Lakhs)</div>
-      <div class="spark-row">
-        <div class="spark-col">
-          <div class="spark-bar-area"><div class="spark-bar" style="height:74%;background:linear-gradient(to top,#4f46e5,#818cf8)"><span class="sv">₹7.35L</span></div></div>
-          <div class="spark-month">Oct</div><div class="spark-year">2025</div>
-        </div>
-        <div class="spark-col">
-          <div class="spark-bar-area"><div class="spark-bar" style="height:71%;background:linear-gradient(to top,#4f46e5,#818cf8)"><span class="sv">₹7.06L</span></div></div>
-          <div class="spark-month">Nov</div><div class="spark-year">2025</div>
-        </div>
-        <div class="spark-col">
-          <div class="spark-bar-area"><div class="spark-bar" style="height:79%;background:linear-gradient(to top,#4f46e5,#818cf8)"><span class="sv">₹7.83L</span></div></div>
-          <div class="spark-month">Dec</div><div class="spark-year">2025</div>
-        </div>
-        <div class="spark-col">
-          <div class="spark-bar-area"><div class="spark-bar" style="height:91%;background:linear-gradient(to top,#7c3aed,#a78bfa)"><span class="sv">₹9.01L</span></div></div>
-          <div class="spark-month">Jan</div><div class="spark-year">2026</div>
-        </div>
-        <div class="spark-col">
-          <div class="spark-bar-area"><div class="spark-bar" style="height:68%;background:linear-gradient(to top,#7c3aed,#a78bfa)"><span class="sv">₹6.78L</span></div></div>
-          <div class="spark-month">Feb</div><div class="spark-year">2026</div>
-        </div>
-        <div class="spark-col">
-          <div class="spark-bar-area"><div class="spark-bar" style="height:100%;background:linear-gradient(to top,#dc2626,#f87171)"><span class="sv" style="color:#f87171">₹9.94L</span></div></div>
-          <div class="spark-month">Mar</div><div class="spark-year">2026</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="chart-grid">
-      <div class="chart-box">
-        <div class="chart-title">Q4 2025 Breakdown</div>
-        <div style="font-size:24px;font-weight:700;color:var(--accent2);margin-bottom:12px">₹22.24L</div>
-        <div class="hbar" style="margin-bottom:16px">
-          <div class="hbar-row"><div class="hbar-label">October</div><div class="hbar-track"><div class="hbar-fill" style="width:94%;background:#4f46e5;border-radius:6px"></div></div><div class="hbar-val">₹7.35L</div></div>
-          <div class="hbar-row"><div class="hbar-label">November</div><div class="hbar-track"><div class="hbar-fill" style="width:90%;background:#6366f1;border-radius:6px"></div></div><div class="hbar-val">₹7.06L</div></div>
-          <div class="hbar-row"><div class="hbar-label">December</div><div class="hbar-track"><div class="hbar-fill" style="width:100%;background:#818cf8;border-radius:6px"></div></div><div class="hbar-val">₹7.83L</div></div>
-        </div>
-        <div style="font-size:12px;color:var(--text3)">Avg: ₹7.41L/month</div>
-      </div>
-      <div class="chart-box">
-        <div class="chart-title">Q1 2026 Breakdown</div>
-        <div style="font-size:24px;font-weight:700;color:var(--accent2);margin-bottom:12px">₹25.73L</div>
-        <div class="hbar" style="margin-bottom:16px">
-          <div class="hbar-row"><div class="hbar-label">January</div><div class="hbar-track"><div class="hbar-fill" style="width:91%;background:#7c3aed;border-radius:6px"></div></div><div class="hbar-val">₹9.01L</div></div>
-          <div class="hbar-row"><div class="hbar-label">February</div><div class="hbar-track"><div class="hbar-fill" style="width:68%;background:#8b5cf6;border-radius:6px"></div></div><div class="hbar-val">₹6.78L</div></div>
-          <div class="hbar-row"><div class="hbar-label">March</div><div class="hbar-track"><div class="hbar-fill" style="width:100%;background:#a78bfa;border-radius:6px"></div></div><div class="hbar-val">₹9.94L</div></div>
-        </div>
-        <div style="font-size:12px;color:var(--text3)">Avg: ₹8.58L/month (+15.7% vs Q4)</div>
-      </div>
-    </div>
-
-    <h3>Month with Lowest vs Highest Spend</h3>
-    <div class="stats-grid" style="grid-template-columns:1fr 1fr">
-      <div class="stat-card" style="border-left:4px solid var(--green)">
-        <div class="stat-value" style="color:var(--green)">₹6.78L</div>
-        <div class="stat-label">Feb 2026 — Lowest Month</div>
-      </div>
-      <div class="stat-card" style="border-left:4px solid var(--red)">
-        <div class="stat-value" style="color:var(--red)">₹9.94L</div>
-        <div class="stat-label">Mar 2026 — Highest Month</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ TAB 3: VENDORS ═══ -->
-  <div class="tab-panel" id="panel-vendors">
-    <h2>Top Vendors by Spend</h2>
-    <p class="section-desc">The 8 largest vendors account for over 85% of all expenditure.</p>
-
-    <div class="vendor-grid">
-      <div class="vcard" style="border-top:3px solid #8b5cf6">
-        <div class="vcard-name">Elite Protection Security</div>
-        <div class="vcard-svc">Housekeeping & Security</div>
-        <div class="vcard-amt">₹9.66L</div>
-        <div class="vcard-detail">Q4: ₹4.84L &rarr; Q1: ₹4.82L</div>
-        <div class="vcard-detail"><span class="pill down">-0.4%</span></div>
-      </div>
-      <div class="vcard" style="border-top:3px solid #3b82f6">
-        <div class="vcard-name">Sri Anelingeswara Minerals</div>
-        <div class="vcard-svc">SAL Water Tanker</div>
-        <div class="vcard-amt">₹9.50L</div>
-        <div class="vcard-detail">Q4: ₹4.51L &rarr; Q1: ₹4.99L</div>
-        <div class="vcard-detail"><span class="pill warn">+10.7%</span></div>
-      </div>
-      <div class="vcard" style="border-top:3px solid #f59e0b">
-        <div class="vcard-name">BESCOM</div>
-        <div class="vcard-svc">Common Area Electricity</div>
-        <div class="vcard-amt">₹5.83L</div>
-        <div class="vcard-detail">Q4: ₹2.89L &rarr; Q1: ₹2.94L</div>
-        <div class="vcard-detail"><span class="pill flat">+1.7%</span></div>
-      </div>
-      <div class="vcard" style="border-top:3px solid #60a5fa">
-        <div class="vcard-name">Sri Lakshmi Siddeshwara</div>
-        <div class="vcard-svc">Water Tanker 1</div>
-        <div class="vcard-amt">₹5.67L</div>
-        <div class="vcard-detail">Q4: ₹2.83L &rarr; Q1: ₹2.85L</div>
-        <div class="vcard-detail"><span class="pill flat">+0.7%</span></div>
-      </div>
-    </div>
-    <div class="vendor-grid">
-      <div class="vcard" style="border-top:3px solid #10b981">
-        <div class="vcard-name">Kushappa R Shinde</div>
-        <div class="vcard-svc">STP & WTP Maintenance</div>
-        <div class="vcard-amt">₹2.48L</div>
-        <div class="vcard-detail">Q4: ₹1.20L &rarr; Q1: ₹1.28L</div>
-        <div class="vcard-detail"><span class="pill warn">+6.5%</span></div>
-      </div>
-      <div class="vcard" style="border-top:3px solid #14b8a6">
-        <div class="vcard-name">Rajdeep Enterprises</div>
-        <div class="vcard-svc">Fogging, Gardening & HK</div>
-        <div class="vcard-amt">₹1.86L</div>
-        <div class="vcard-detail">Q4: ₹0.90L &rarr; Q1: ₹0.96L</div>
-        <div class="vcard-detail"><span class="pill warn">+6.4%</span></div>
-      </div>
-      <div class="vcard" style="border-top:3px solid #ef4444">
-        <div class="vcard-name">Krishna Hardware</div>
-        <div class="vcard-svc">Plumbing Material</div>
-        <div class="vcard-amt">₹1.22L</div>
-        <div class="vcard-detail">Q4: ₹0.64L &rarr; Q1: ₹0.59L</div>
-        <div class="vcard-detail"><span class="pill down">-7.4%</span></div>
-      </div>
-      <div class="vcard" style="border-top:3px solid #dc2626">
-        <div class="vcard-name">Treis / United / MR Ent.</div>
-        <div class="vcard-svc">Generator Diesel</div>
-        <div class="vcard-amt">₹1.03L</div>
-        <div class="vcard-detail">Q4: ₹0.37L &rarr; Q1: ₹0.66L</div>
-        <div class="vcard-detail"><span class="pill up">+80.3%</span></div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <h3>Water Supply — Cost Split</h3>
-    <p class="section-desc">Water is the #1 cost. SAL Water (Sri Anelingeswara) accounts for 62% of all water spend.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Supplier</th><th>Type</th><th class="num">Q4 2025</th><th class="num">Q1 2026</th><th class="num">6-Month Total</th><th class="num">Share</th></tr></thead>
-        <tbody>
-          <tr><td>Sri Anelingeswara Minerals</td><td>SAL Water Tanker</td><td class="num">₹4,51,000</td><td class="num">₹4,99,400</td><td class="num">₹9,50,400</td><td class="num">62.4%</td></tr>
-          <tr><td>Sri Lakshmi Siddeshwara</td><td>Water Tanker 1</td><td class="num">₹2,82,740</td><td class="num">₹2,84,740</td><td class="num">₹5,67,480</td><td class="num">37.3%</td></tr>
-          <tr><td>Cumins Genesis / Lakshana</td><td>Pool Water</td><td class="num">₹5,075</td><td class="num">—</td><td class="num">₹5,075</td><td class="num">0.3%</td></tr>
-          <tr class="total-row"><td colspan="2"><strong>Total Water</strong></td><td class="num"><strong>₹7,38,815</strong></td><td class="num"><strong>₹7,84,140</strong></td><td class="num"><strong>₹15,22,955</strong></td><td class="num">100%</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ═══ TAB 4: ONE-TIME ═══ -->
-  <div class="tab-panel" id="panel-onetime">
-    <h2>One-time & Capital Expenses</h2>
-    <p class="section-desc">Non-recurring purchases in Q1 2026 that inflated the quarter's total. Without these, recurring costs grew only 3.8%.</p>
-
-    <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:20px">
-      <div class="stat-card" style="border-top:3px solid var(--amber)">
-        <div class="stat-value" style="color:var(--amber)">₹2.82L</div>
-        <div class="stat-label">Total One-time Items</div>
-      </div>
-      <div class="stat-card" style="border-top:3px solid var(--green)">
-        <div class="stat-value" style="color:var(--green)">₹23.07L</div>
-        <div class="stat-label">Q1 Recurring Only</div>
-      </div>
-      <div class="stat-card" style="border-top:3px solid var(--blue)">
-        <div class="stat-value" style="color:var(--blue)">+3.8%</div>
-        <div class="stat-label">Recurring QoQ Growth</div>
-      </div>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Item</th><th>Vendor</th><th class="num">Amount</th><th>Purpose</th></tr></thead>
-        <tbody>
-          <tr><td><strong>STP Rework</strong></td><td>Lokamantri Enviro Protection</td><td class="num">₹1,00,000</td><td>Sewage treatment plant overhaul</td></tr>
-          <tr><td><strong>Garbage Dustbins</strong></td><td>Buymore Ecommerce</td><td class="num">₹51,542</td><td>Bulk dustbin purchase</td></tr>
-          <tr><td><strong>Generator Battery</strong></td><td>Jai Hanuman Battery</td><td class="num">₹29,000</td><td>Backup generator battery</td></tr>
-          <tr><td><strong>Garbage Area Work</strong></td><td>Multiple vendors</td><td class="num">₹27,400</td><td>Cleaning, plants, hanging pots, banner</td></tr>
-          <tr><td><strong>Motor Repair</strong></td><td>Muneeswaran Electricals</td><td class="num">₹17,000</td><td>Building system motor repairs</td></tr>
-          <tr><td><strong>CCTV Monitor</strong></td><td>Amazon</td><td class="num">₹15,010</td><td>TV for CCTV surveillance</td></tr>
-          <tr><td><strong>Staircase Lights</strong></td><td>Tilak Prasad</td><td class="num">₹12,950</td><td>BF & GF staircase lighting</td></tr>
-          <tr><td><strong>Foldable Ladder</strong></td><td>Amazon</td><td class="num">₹11,990</td><td>Maintenance equipment</td></tr>
-          <tr><td><strong>Panel ATS Fixing</strong></td><td>Roshan Infra Solutions</td><td class="num">₹8,500</td><td>Auto transfer switch</td></tr>
-          <tr><td><strong>Pool Lights & Welding</strong></td><td>Hydrotech / Mubarak</td><td class="num">₹8,934</td><td>Pool lights + railing welding</td></tr>
-          <tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td class="num"><strong>₹2,82,326</strong></td><td></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>Impact Visualization</h3>
-    <div class="chart-box">
-      <div style="display:flex;align-items:center;gap:24px">
-        <svg width="180" height="180" viewBox="0 0 180 180">
-          <circle cx="90" cy="90" r="72" fill="none" stroke="#2a2d3a" stroke-width="24"/>
-          <circle cx="90" cy="90" r="72" fill="none" stroke="#6366f1" stroke-width="24"
-                  stroke-dasharray="394 452.4" stroke-dashoffset="113.1" transform="rotate(-90 90 90)"/>
-          <circle cx="90" cy="90" r="72" fill="none" stroke="#fbbf24" stroke-width="24"
-                  stroke-dasharray="58 452.4" stroke-dashoffset="-281" transform="rotate(-90 90 90)"/>
-          <circle cx="90" cy="90" r="52" fill="var(--surface)"/>
-          <text x="90" y="86" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text)">89.7%</text>
-          <text x="90" y="102" text-anchor="middle" font-size="10" fill="var(--text3)">Recurring</text>
-        </svg>
-        <div>
-          <div style="margin-bottom:12px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <span style="width:12px;height:12px;border-radius:3px;background:#6366f1"></span>
-              <span style="font-size:13px;font-weight:600">Recurring: ₹23.07L</span>
-            </div>
-            <div style="font-size:12px;color:var(--text3)">Regular contracts, utilities, salaries — stable operational base</div>
-          </div>
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-              <span style="width:12px;height:12px;border-radius:3px;background:#fbbf24"></span>
-              <span style="font-size:13px;font-weight:600">One-time: ₹2.66L</span>
-            </div>
-            <div style="font-size:12px;color:var(--text3)">Capital purchases & infrastructure repairs — not expected to repeat</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <h3>Receipts & Income</h3>
-    <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr">
-      <div class="stat-card" style="border-top:3px solid var(--green)">
-        <div class="stat-value" style="color:var(--green)">₹10,421</div>
-        <div class="stat-label">Q4 2025 Receipts</div>
-      </div>
-      <div class="stat-card" style="border-top:3px solid var(--green)">
-        <div class="stat-value" style="color:var(--green)">₹20,887</div>
-        <div class="stat-label">Q1 2026 Receipts</div>
-      </div>
-      <div class="stat-card" style="border-top:3px solid var(--blue)">
-        <div class="stat-value" style="color:var(--blue)">+100%</div>
-        <div class="stat-label">Receipt Growth</div>
-      </div>
-    </div>
-    <p class="section-desc">Sources: NoBroker referral income, party hall bookings, move-in fees, and ParkPlus sticker sales. March saw a large spike in ParkPlus sticker revenue from new registrations.</p>
-  </div>
-
-  <!-- ═══ TAB 5: INSIGHTS ═══ -->
-  <div class="tab-panel" id="panel-insights">
-    <h2>Key Insights & Recommendations</h2>
-    <p class="section-desc">Summary of findings from the 6-month expenditure analysis.</p>
-
-    <div class="insight-grid">
-      <div class="insight g">
-        <div class="insight-t">Stable Core Operations</div>
-        <div class="insight-d">Fogging (₹73.5K), BBMP Garbage (₹48K), and Manager Salary (₹69K) remained perfectly flat across both quarters — no cost creep. Recurring expenses grew only 3.8% QoQ when one-time items are excluded.</div>
-      </div>
-      <div class="insight r">
-        <div class="insight-t">Water is 31.8% of All Spend</div>
-        <div class="insight-d">At ₹15.23L over 6 months (₹2.54L/month), water supply is the single largest cost. SAL Water Tanker alone is ₹9.50L. Exploring rainwater harvesting or bore well optimization could significantly reduce costs.</div>
-      </div>
-      <div class="insight a">
-        <div class="insight-t">Generator Costs Tripled (+159%)</div>
-        <div class="insight-d">From ₹36.8K to ₹95.3K — driven by battery replacement (₹29K) and higher diesel consumption from 3 different vendors. Consider consolidating to a single diesel supplier for better rates.</div>
-      </div>
-      <div class="insight b">
-        <div class="insight-t">Salt Consumption Doubled (+100%)</div>
-        <div class="insight-d">4 refills in Q1 vs 2 in Q4 at ₹15K each. This could indicate higher water hardness or increased water processing. Worth investigating if softener efficiency has dropped.</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="insight-grid">
-      <div class="insight g">
-        <div class="insight-t">Lift Costs Dropped 35%</div>
-        <div class="insight-d">₹66.3K → ₹43.2K. Q4 included ₹23K in spare parts that didn't recur. The quarterly maintenance contract of ₹43.2K (₹14.4K/month) appears reasonable.</div>
-      </div>
-      <div class="insight a">
-        <div class="insight-t">Plumbing is a Recurring Drain</div>
-        <div class="insight-d">₹2.39L over 6 months across material purchases and labor. December alone saw ₹62.7K in plumbing material. Consider a preventive maintenance program to reduce reactive plumbing costs.</div>
-      </div>
-      <div class="insight b">
-        <div class="insight-t">Receipts Growing Fast (+100%)</div>
-        <div class="insight-d">₹10.4K → ₹20.9K. ParkPlus sticker sales surged in March. Expanding revenue sources (hall rentals, advertising, etc.) could help offset common area expenses.</div>
-      </div>
-      <div class="insight r">
-        <div class="insight-t">Capital Investments Needed</div>
-        <div class="insight-d">STP rework (₹1L), dustbins (₹51.5K), CCTV (₹15K), and other infrastructure items suggest the building needs ongoing capital investment. Budget ₹50K-₹1L/quarter for such items.</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <h3>Cost Optimization Opportunities</h3>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Area</th><th>Current Spend</th><th>Opportunity</th><th>Potential Saving</th></tr></thead>
-        <tbody>
-          <tr><td>Water Supply</td><td>₹2.54L/month</td><td>Rainwater harvesting, bore well optimization</td><td>10-20%</td></tr>
-          <tr><td>Generator Diesel</td><td>₹0.66L/quarter</td><td>Consolidate to single vendor, negotiate bulk rate</td><td>10-15%</td></tr>
-          <tr><td>Plumbing</td><td>₹0.40L/month</td><td>Preventive maintenance program</td><td>15-25%</td></tr>
-          <tr><td>Salt for Softner</td><td>₹0.20L/quarter</td><td>Check softener efficiency, water quality</td><td>Variable</td></tr>
-          <tr><td>Receipts</td><td>₹0.07L/quarter</td><td>Increase hall bookings, parking revenue</td><td>Revenue uplift</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="footer">
-    Srimitra Lifestyle &middot; Expenditure Analysis &middot; Oct 2025 – Mar 2026 &middot; Generated from bank transaction records
+<!-- ═══ MOBILE TOOLBAR ═══ -->
+<div class="mobile-toolbar" id="mobileToolbar">
+  <div class="mob-title">Srimitra Lifestyle</div>
+  <div class="mob-actions">
+    <button class="mob-btn" id="mobTheme" onclick="toggleTheme()">☀️</button>
+    <a class="mob-btn" href="accounts.html" style="text-decoration:none;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--teal);border-color:var(--teal)">🏦 Income</a>
+    <button class="mob-btn" onclick="window.print()">📄</button>
   </div>
 </div>
 
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">Srimitra Lifestyle</div>
+  <div class="sidebar-nav" id="sidebarNav"></div>
+  <div class="sidebar-footer" style="flex-direction:column;gap:6px">
+    <div style="display:flex;gap:8px"><button class="sidebar-btn" id="btnTheme" onclick="toggleTheme()">Light</button>
+    <button class="sidebar-btn" onclick="window.print()">Print/PDF</button></div>
+    <a class="sidebar-btn" href="accounts.html" style="background:rgba(45,212,191,.1);border-color:var(--teal);color:var(--teal);font-weight:600;text-decoration:none;display:block">\u2192 Account Statement</a>
+  </div>
+</nav>
+
+<!-- ═══ MOBILE BOTTOM NAV ═══ -->
+<div class="mobile-nav" id="mobileNav"><div class="mobile-nav-inner" id="mobileNavInner"></div></div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main" id="main">
+  <div class="header">
+    <h1>Expenditure Dashboard</h1>
+    <div class="header-sub" id="headerSub"></div>
+  </div>
+  <div class="filter-bar" id="filterBar"></div>
+  <div id="content"></div>
+  <div class="footer" id="footer"></div>
+</div>
+
+<div class="chart-tooltip" id="tooltip"></div>
+
 <script>
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+// ═══════════════════════════════════════════════════════════
+//  DATA — Add a new quarter by appending to this array
+// ═══════════════════════════════════════════════════════════
+const CAT_META = {
+  water:     {label:"Water Supply",       color:"#3b82f6"},
+  security:  {label:"Security & HK",      color:"#8b5cf6"},
+  electricity:{label:"Electricity",       color:"#f59e0b"},
+  stp:       {label:"STP & WTP",          color:"#10b981"},
+  fogging:   {label:"Fogging & Garden",   color:"#14b8a6"},
+  swimming:  {label:"Swimming Pool",      color:"#06b6d4"},
+  bbmp:      {label:"BBMP Garbage",       color:"#64748b"},
+  generator: {label:"Generator & Fuel",   color:"#dc2626"},
+  salary:    {label:"Salary",             color:"#78716c"},
+  lift:      {label:"Lift Maintenance",   color:"#a3a3a3"},
+  barriers:  {label:"Barriers/ParkPlus",  color:"#ec4899"},
+  plumbing:  {label:"Plumbing",           color:"#ef4444"},
+  salt:      {label:"Salt & Softener",    color:"#0ea5e9"},
+  others:    {label:"Others",             color:"#6b7280"}
+};
+
+const QUARTERS = [
+  {id:"q3fy25",label:"Nov\u2013Dec 2024",months:2,total:1618332,receipts:500,
+   cats:{water:817200,security:332236,electricity:176182,stp:84000,fogging:49000,swimming:20000,bbmp:26000,generator:13594,salary:33000,lift:43200,barriers:0,plumbing:1020,salt:0,others:22900}},
+  {id:"q4fy25",label:"Jan\u2013Mar 2025",months:3,total:2770294,receipts:48959,
+   cats:{water:1106715,security:511020,electricity:262426,stp:119000,fogging:73500,swimming:30000,bbmp:39000,generator:44897,salary:43000,lift:43200,barriers:43188,plumbing:99484,salt:0,others:354864}},
+  {id:"q1fy26",label:"Apr\u2013Jun 2025",months:3,total:2074290,receipts:34342,
+   cats:{water:737775,security:512749,electricity:263203,stp:114000,fogging:73500,swimming:30000,bbmp:38001,generator:36900,salary:69000,lift:43200,barriers:43188,plumbing:21476,salt:0,others:91298}},
+  {id:"q2fy26",label:"Jul\u2013Sep 2025",months:3,total:2547393,receipts:11639,
+   cats:{water:940030,security:523052,electricity:285571,stp:118000,fogging:73500,swimming:30000,bbmp:44000,generator:92718,salary:69000,lift:43200,barriers:43188,plumbing:6355,salt:134400,others:144379}},
+  {id:"q3fy26",label:"Oct\u2013Dec 2025",months:3,total:2223545,receipts:10421,
+   cats:{water:738815,security:500678,electricity:289007,stp:120000,fogging:73500,swimming:31925,bbmp:48000,generator:36802,salary:69000,lift:66269,barriers:43188,plumbing:115920,salt:30000,others:60441}},
+  {id:"q4fy26",label:"Jan\u2013Mar 2026",months:3,total:2573439,receipts:20887,
+   cats:{water:784140,security:492909,electricity:294004,stp:127750,fogging:73500,swimming:38934,bbmp:48000,generator:95346,salary:69000,lift:43200,barriers:57466,plumbing:122880,salt:60000,others:266310}}
+];
+
+const MONTHLY = [
+  {m:"Nov 24",v:809166},{m:"Dec 24",v:809166},
+  {m:"Jan 25",v:923431},{m:"Feb 25",v:923431},{m:"Mar 25",v:923432},
+  {m:"Apr 25",v:691430},{m:"May 25",v:691430},{m:"Jun 25",v:691430},
+  {m:"Jul 25",v:849131},{m:"Aug 25",v:849131},{m:"Sep 25",v:849131},
+  {m:"Oct 25",v:735000},{m:"Nov 25",v:706000},{m:"Dec 25",v:783000},
+  {m:"Jan 26",v:901000},{m:"Feb 26",v:678000},{m:"Mar 26",v:994000}
+];
+
+// Transactions: [date, vendor, amount(+debit/-credit), category]
+const TXN = [
+["2024-11-02","Sagayanandan S",23000,"salary"],["2024-11-02","Aero Lifts",43200,"lift"],
+["2024-11-05","In Hand Cash",1150,"others"],["2024-11-05","Mohammed Ameen",1500,"others"],
+["2024-11-06","Manjunatha Enterprises",12000,"bbmp"],["2024-11-06","Sri Sai Swimming Pool",10000,"swimming"],
+["2024-11-06","Kushappa R Shinde",46000,"stp"],["2024-11-06","Elite Protection",45742,"security"],
+["2024-11-08","Elite Protection",34677,"security"],
+["2024-11-10","Rajdeep Enterprises",24500,"fogging"],["2024-11-10","Rajdeep Enterprises",6715,"fogging"],
+["2024-11-10","Elite Protection",82952,"security"],
+["2024-11-10","BESCOM 0257337691",43627,"electricity"],["2024-11-13","BESCOM 0745286501",43025,"electricity"],
+["2024-11-17","Sri Muneshwara Water",170000,"water"],
+["2024-11-25","Gym Access Cards",3139,"others"],
+["2024-11-25","Sri Lakshmi Siddeshwara",200000,"water"],["2024-11-25","Sri Lakshmi Siddeshwara",20000,"water"],
+["2024-12-05","Ramesh Chandra",12000,"others"],
+["2024-12-08","Manager Salary",10000,"salary"],
+["2024-12-09","Manjunatha Enterprises",12000,"bbmp"],["2024-12-09","Sri Muneshwara Water",161600,"water"],
+["2024-12-09","Rajdeep Enterprises",24500,"fogging"],["2024-12-09","Kushappa R Shinde",38000,"stp"],
+["2024-12-09","Sri Sai Swimming Pool",10000,"swimming"],["2024-12-09","Treis Solutions",13594,"generator"],
+["2024-12-09","Elite Protection",49167,"security"],["2024-12-09","Elite Protection",112983,"security"],
+["2024-12-11","BESCOM 0257337691",45762,"electricity"],["2024-12-11","BESCOM 0745286501",43768,"electricity"],
+["2024-12-20","Sri Lakshmi Siddeshwara",200000,"water"],
+["2024-12-24","Mohammed Ameen",1200,"others"],["2024-12-30","Sri Lakshmi Siddeshwara",65200,"water"],
+["2025-01-06","Manager Salary",10000,"salary"],
+["2025-01-09","Sri Sai Swimming Pool",10000,"swimming"],["2025-01-09","Rajdeep Enterprises",24500,"fogging"],
+["2025-01-09","Kushappa R Shinde",43000,"stp"],["2025-01-09","Elite Protection",49613,"security"],
+["2025-01-09","Elite Protection",113500,"security"],
+["2025-01-10","BESCOM 0257337691",43967,"electricity"],["2025-01-10","BESCOM 0745286501",43506,"electricity"],
+["2025-01-15","Parviom Technologies",43188,"barriers"],
+["2025-01-18","Manjunatha Enterprises",12000,"bbmp"],
+["2025-01-20","MR Enterprises",5790,"generator"],
+["2025-01-21","Aero Lifts",43200,"lift"],
+["2025-01-23","Rajdeep Enterprises",6730,"fogging"],
+["2025-01-26","Treis Solutions",18059,"generator"],
+["2025-01-28","Pawan Electrical",30000,"plumbing"],
+["2025-01-30","Pawan Electrical",59666,"plumbing"],
+["2025-01-31","Munusamy (Mason)",7000,"others"],
+["2025-02-01","Hajib Trading (Motor)",40701,"others"],
+["2025-02-02","Manager Salary",10000,"salary"],
+["2025-02-03","Panchanan Nayak",10000,"plumbing"],
+["2025-02-03","Sri Muneshwara Water",168000,"water"],["2025-02-03","Sri Muneshwara Water",173600,"water"],
+["2025-02-06","Sri Lakshmi Siddeshwara",64000,"water"],["2025-02-06","Sri Lakshmi Siddeshwara",237200,"water"],
+["2025-02-09","Elite Protection",113500,"security"],["2025-02-09","Elite Protection",49226,"security"],
+["2025-02-09","Sri Sai Swimming Pool",10000,"swimming"],["2025-02-09","Rajdeep Enterprises",24500,"fogging"],
+["2025-02-09","Kushappa R Shinde",38000,"stp"],
+["2025-02-11","Sri Lakshmi Siddeshwara",50000,"water"],
+["2025-02-12","BESCOM 0745286501",44406,"electricity"],["2025-02-13","BESCOM 0257337691",44810,"electricity"],
+["2025-02-17","Tilak Prasad",1800,"others"],
+["2025-02-20","Manjunatha Enterprises",12000,"bbmp"],
+["2025-02-25","Print 18",20000,"others"],["2025-02-25","Sri Lakshmi Siddeshwara",180000,"water"],
+["2025-02-28","Roshan Infra",57903,"others"],
+["2025-03-01","Print 18",30000,"others"],
+["2025-03-06","Sri Sai Swimming Pool",10000,"swimming"],["2025-03-06","Cumins Genesis",5075,"water"],
+["2025-03-06","Kushappa R Shinde",38000,"stp"],["2025-03-06","Rajdeep Enterprises",24500,"fogging"],
+["2025-03-07","Sri Muneshwara Water",64500,"water"],
+["2025-03-08","BESCOM 0257337691",44731,"electricity"],["2025-03-08","BESCOM 0745286501",41006,"electricity"],
+["2025-03-09","Manager Salary",23000,"salary"],
+["2025-03-11","Print 18",25166,"others"],
+["2025-03-11","Panchanan Nayak",15000,"plumbing"],
+["2025-03-12","Min Taj Uddin (Motor)",35001,"others"],["2025-03-13","Elite Protection",113000,"security"],
+["2025-03-13","Elite Protection",50571,"security"],
+["2025-03-14","Min Taj Uddin (Motor)",36000,"others"],
+["2025-03-15","Rajdeep Enterprises",12980,"fogging"],
+["2025-03-17","Panchanan Nayak",13000,"plumbing"],
+["2025-03-18","Tilak Prasad",2000,"others"],["2025-03-18","Sri Lakshmi Siddeshwara",80000,"water"],
+["2025-03-25","Sri Lakshmi Siddeshwara",6940,"water"],
+["2025-03-26","Treis Solutions",18048,"generator"],
+["2025-03-29","Manjunatha Enterprises",12000,"bbmp"],
+["2025-03-31","SAL Water Tanker",77000,"water"],
+["2025-04-01","Panchanan Nayak",2000,"plumbing"],
+["2025-04-05","Manager Salary",23000,"salary"],
+["2025-04-07","Sri Sai Swimming Pool",10000,"swimming"],["2025-04-07","Rajdeep Enterprises",24500,"fogging"],
+["2025-04-07","Kushappa R Shinde",38000,"stp"],
+["2025-04-08","Elite Protection",113500,"security"],["2025-04-08","Elite Protection",49581,"security"],
+["2025-04-08","Manjunatha Enterprises",12001,"bbmp"],
+["2025-04-10","BESCOM 0257337691",50893,"electricity"],["2025-04-11","BESCOM 0745286501",41916,"electricity"],
+["2025-04-12","Sri Lakshmi Siddeshwara",66596,"water"],
+["2025-04-15","Parviom Technologies",43188,"barriers"],
+["2025-04-19","Sri Lakshmi Siddeshwara",40000,"water"],["2025-04-19","Sri Lakshmi Siddeshwara",6679,"water"],
+["2025-04-22","Elite Protection",5000,"security"],
+["2025-04-23","SAL Water Tanker",193050,"water"],
+["2025-04-28","Pavan Electricals",20176,"plumbing"],
+["2025-05-01","Treis Solutions",18450,"generator"],
+["2025-05-03","Manager Salary",23000,"salary"],
+["2025-05-07","Rajdeep Enterprises",24500,"fogging"],["2025-05-07","Rajdeep Enterprises",7505,"fogging"],
+["2025-05-07","Sri Sai Swimming Pool",10000,"swimming"],["2025-05-07","Kushappa R Shinde",38000,"stp"],
+["2025-05-07","Manjunatha Enterprises",12000,"bbmp"],
+["2025-05-08","Motor Repair",6400,"others"],
+["2025-05-09","Elite Protection",113500,"security"],["2025-05-09","Elite Protection",49200,"security"],
+["2025-05-13","BESCOM 0745286501",43046,"electricity"],["2025-05-13","BESCOM 0257337691",49734,"electricity"],
+["2025-05-14","Aero Lifts (Fan)",3481,"lift"],
+["2025-05-15","SAL Water Tanker",159300,"water"],
+["2025-05-16","Lawyer Fees",10000,"others"],
+["2025-06-02","Misc SMS",86.73,"others"],
+["2025-06-03","Treis Solutions",18450,"generator"],
+["2025-06-04","Manager Salary",23000,"salary"],
+["2025-06-07","Manjunatha Enterprises",12000,"bbmp"],["2025-06-07","Sri Sai Swimming Pool",10000,"swimming"],
+["2025-06-07","Rajdeep Enterprises",24500,"fogging"],["2025-06-07","Aero Lifts",43200,"lift"],
+["2025-06-10","Elite Protection",49613,"security"],["2025-06-10","Elite Protection",113500,"security"],
+["2025-06-11","Syscom CCTV",5000,"others"],["2025-06-11","Kushappa R Shinde",38000,"stp"],
+["2025-06-11","Rajdeep Enterprises",9500,"fogging"],
+["2025-06-12","Rajdeep Enterprises",1850,"fogging"],
+["2025-06-12","BESCOM 0257337691",41041,"electricity"],["2025-06-12","BESCOM 0745286501",36573,"electricity"],
+["2025-06-16","Sri Lakshmi Siddeshwara",10000,"water"],
+["2025-06-17","Syscom CCTV",6000,"others"],
+["2025-06-18","SAL Water Tanker",160650,"water"],
+["2025-06-24","Syscom CCTV",1500,"others"],
+["2025-06-27","Mohammed Ameen",2000,"others"],
+["2025-06-30","Sri Lakshmi Siddeshwara",100000,"water"],
+["2025-07-02","Mayur Yadav (CCTV)",3500,"others"],
+["2025-07-02","Sri Lakshmi Siddeshwara",50000,"water"],
+["2025-07-03","Tilak Prasad (Plumber)",3500,"plumbing"],
+["2025-07-03","Rajdeep Enterprises",24500,"fogging"],
+["2025-07-05","Manager Salary",23000,"salary"],
+["2025-07-08","Manjunatha Enterprises",12000,"bbmp"],
+["2025-07-09","Elite Protection",49200,"security"],
+["2025-07-09","BESCOM 0745286501",41894,"electricity"],
+["2025-07-10","Elite Protection",113500,"security"],
+["2025-07-10","BESCOM 0257337691",49247,"electricity"],
+["2025-07-10","Mayur Yadav (CCTV)",4250,"others"],
+["2025-07-11","Lokamantri Enviro (Softener)",75001,"salt"],
+["2025-07-11","Sri Sai Swimming Pool",10000,"swimming"],
+["2025-07-12","Sri Sai Swimming Pool (Tanker)",7975,"swimming"],
+["2025-07-14","SAL Water Tanker",193050,"water"],
+["2025-07-15","Parviom Technologies",43188,"barriers"],
+["2025-07-16","Treis Solutions",18450,"generator"],["2025-07-16","Kushappa R Shinde",38000,"stp"],
+["2025-07-21","Rajdeep Enterprises",8240,"fogging"],
+["2025-07-28","Kushappa R Shinde (Salt)",17200,"salt"],
+["2025-08-01","Treis Solutions",18567,"generator"],
+["2025-08-02","Motor Repair",10501,"others"],
+["2025-08-06","Manager Salary",23000,"salary"],
+["2025-08-07","Treis Solutions",18567,"generator"],
+["2025-08-07","Rajdeep Enterprises",24500,"fogging"],["2025-08-07","Sri Sai Swimming Pool",10000,"swimming"],
+["2025-08-07","Manjunatha Enterprises",12000,"bbmp"],
+["2025-08-13","Kushappa R Shinde",40000,"stp"],
+["2025-08-13","Elite Protection",81734,"security"],["2025-08-13","Elite Protection",81734,"security"],
+["2025-08-13","Rajdeep Enterprises",9046,"fogging"],
+["2025-08-13","OHT Cleaning",12000,"others"],
+["2025-08-15","Independence Day",5700,"others"],
+["2025-08-15","Kushappa (Softener Material)",50000,"salt"],
+["2025-08-16","B T Lokesha (Softener)",50000,"salt"],
+["2025-08-20","BESCOM 0745286501",46581,"electricity"],["2025-08-20","BESCOM 0257337691",51602,"electricity"],
+["2025-08-21","SAL Water Tanker",158400,"water"],
+["2025-08-21","Sri Lakshmi Siddeshwara",265845,"water"],
+["2025-09-03","Misc SMS",64.07,"others"],
+["2025-09-04","Manager Salary",23000,"salary"],
+["2025-09-06","Sri Sai Swimming Pool",10000,"swimming"],["2025-09-06","Rajdeep Enterprises",24500,"fogging"],
+["2025-09-08","Kushappa R Shinde",40000,"stp"],
+["2025-09-09","BESCOM 0745286501",41184,"electricity"],
+["2025-09-09","Elite Protection",81734,"security"],["2025-09-09","Elite Protection",81734,"security"],
+["2025-09-09","Sri Lakshmi Siddeshwara",107460,"water"],
+["2025-09-10","BESCOM 0257337691",55063,"electricity"],
+["2025-09-11","SAL Water Tanker",157300,"water"],
+["2025-09-11","Treis Solutions",18567,"generator"],
+["2025-09-11","Panchanan Nayak",8000,"plumbing"],
+["2025-09-13","Manjunatha Enterprises",16000,"bbmp"],
+["2025-09-16","Kushappa (Salt)",17200,"salt"],
+["2025-09-17","Rajdeep Enterprises",16130,"fogging"],
+["2025-09-25","Tilak Prasad",6100,"others"],
+["2025-09-30","Treis Solutions",18567,"generator"],["2025-09-30","Aero Lifts",43200,"lift"],
+["2025-10-01","Manager Salary",23000,"salary"],
+["2025-10-06","Sri Sai Swimming Pool",10000,"swimming"],["2025-10-06","Rajdeep Enterprises",24500,"fogging"],
+["2025-10-06","Elite Protection",50000,"security"],["2025-10-07","Elite Protection",50000,"security"],
+["2025-10-08","Manjunatha Enterprises",16000,"bbmp"],["2025-10-08","Elite Protection",50000,"security"],
+["2025-10-09","Kushappa R Shinde",40000,"stp"],
+["2025-10-15","Sri Lakshmi Siddeshwara",50000,"water"],
+["2025-10-16","Aluminium Work",10000,"others"],
+["2025-10-18","Parviom Technologies",43188,"barriers"],
+["2025-10-18","Gym Servicing",34100,"others"],
+["2025-10-19","SAL Water Tanker",158400,"water"],["2025-10-19","Sri Lakshmi Siddeshwara",45680,"water"],
+["2025-10-24","BESCOM 0745286501",44373,"electricity"],["2025-10-26","BESCOM 0257337691",50657,"electricity"],
+["2025-10-28","United Diesel",18235,"generator"],
+["2025-10-29","Salt for Softener",15000,"salt"],
+["2025-11-01","Aluminium Work",7000,"others"],
+["2025-11-02","Manager Salary",23000,"salary"],
+["2025-11-06","Manjunatha Enterprises",16000,"bbmp"],
+["2025-11-09","Rajdeep Enterprises",24500,"fogging"],
+["2025-11-10","Swimming Pool Equipment",1925,"swimming"],["2025-11-10","Sri Sai Swimming Pool",10000,"swimming"],
+["2025-11-10","Cumins Genesis (Pool Water)",5075,"swimming"],
+["2025-11-12","BESCOM 0745286501",46533,"electricity"],
+["2025-11-13","Elite Protection",86611,"security"],["2025-11-13","Elite Protection",86612,"security"],
+["2025-11-14","BESCOM 0257337691",52076,"electricity"],
+["2025-11-14","Rajdeep Enterprises",8482,"fogging"],
+["2025-11-18","Kushappa R Shinde",40000,"stp"],
+["2025-11-20","Sri Lakshmi Siddeshwara",50000,"water"],
+["2025-11-22","SAL Water Tanker",137500,"water"],["2025-11-22","Sri Lakshmi Siddeshwara",47060,"water"],
+["2025-11-24","Treis Solutions",18567,"generator"],
+["2025-11-26","Mitra Lifts",43200,"lift"],
+["2025-12-01","Manager Salary",23000,"salary"],
+["2025-12-03","Krishna Hardware",17240,"plumbing"],
+["2025-12-06","Manjunatha Enterprises",16000,"bbmp"],
+["2025-12-06","Elite Protection",50000,"security"],
+["2025-12-07","Krishna Hardware",13470,"plumbing"],["2025-12-07","Panchanan Nayak",17800,"plumbing"],
+["2025-12-08","Elite Protection",60000,"security"],
+["2025-12-09","Rajdeep Enterprises",24500,"fogging"],["2025-12-09","Sri Sai Swimming Pool",10000,"swimming"],
+["2025-12-10","Elite Protection",50633,"security"],
+["2025-12-11","BESCOM 0257337691",52683,"electricity"],
+["2025-12-11","SAL Water Tanker",155100,"water"],["2025-12-11","Sri Lakshmi Siddeshwara",90000,"water"],
+["2025-12-12","Salt for Softener",15000,"salt"],
+["2025-12-12","BESCOM 0745286501",42685,"electricity"],
+["2025-12-13","Krishna Hardware",9667,"plumbing"],
+["2025-12-15","Kushappa R Shinde",40000,"stp"],["2025-12-15","Panchanan Nayak",10800,"plumbing"],
+["2025-12-18","Rajdeep Enterprises",8340,"fogging"],
+["2025-12-24","Krishna Hardware",5138,"plumbing"],["2025-12-25","Krishna Hardware",4335,"plumbing"],
+["2025-12-28","Krishna Hardware",4380,"plumbing"],
+["2025-12-29","Panchanan Nayak",23800,"plumbing"],["2025-12-29","Krishna Hardware",6800,"plumbing"],
+["2025-12-30","Mitra Lifts (Spares)",23069,"lift"],
+["2026-01-03","Krishna Hardware",5470,"plumbing"],["2026-01-03","Rajdeep Enterprises",4580,"fogging"],
+["2026-01-04","Panchanan Nayak",8400,"plumbing"],["2026-01-04","Tilak Prasad",2500,"others"],
+["2026-01-05","Salt for Softener",15000,"salt"],
+["2026-01-06","Manager Salary",23000,"salary"],
+["2026-01-07","Manjunatha Enterprises",16000,"bbmp"],["2026-01-07","Sri Sai Swimming Pool",10000,"swimming"],
+["2026-01-07","Elite Protection",50000,"security"],
+["2026-01-08","Elite Protection",50000,"security"],["2026-01-08","Rajdeep Enterprises",24500,"fogging"],
+["2026-01-09","Elite Protection",30000,"security"],["2026-01-09","Garbage Area Cleaning",6000,"others"],
+["2026-01-10","Kushappa R Shinde",47750,"stp"],["2026-01-10","Elite Protection",32500,"security"],
+["2026-01-10","Krishna Hardware",2570,"plumbing"],
+["2026-01-11","Panchanan Nayak",17000,"plumbing"],
+["2026-01-12","BESCOM 0257337691",53019,"electricity"],
+["2026-01-14","BESCOM 0745286501",47220,"electricity"],
+["2026-01-17","SAL Water Tanker",161700,"water"],["2026-01-17","Sri Lakshmi Siddeshwara",100280,"water"],
+["2026-01-21","Treis Solutions",18567,"generator"],["2026-01-21","MR Enterprises",2702,"generator"],
+["2026-01-21","Krishna Hardware",14870,"plumbing"],
+["2026-01-22","Krishna Hardware",5070,"plumbing"],["2026-01-22","Parviom Technologies",43188,"barriers"],
+["2026-01-23","Krishna Hardware",5250,"plumbing"],
+["2026-01-25","Krishna Hardware",5540,"plumbing"],["2026-01-25","Panchanan Nayak",24800,"plumbing"],
+["2026-01-26","Republic Day",3910,"others"],
+["2026-01-28","Krishna Hardware",4970,"plumbing"],
+["2026-01-29","Krishna Hardware",8380,"plumbing"],
+["2026-01-30","Mitra Lifts",43200,"lift"],
+["2026-01-31","Tilak Prasad (Barrier Repair)",3250,"others"],["2026-01-31","Krishna Hardware",4170,"plumbing"],
+["2026-02-02","Panchanan Nayak",11400,"plumbing"],
+["2026-02-04","Manager Salary",23000,"salary"],
+["2026-02-06","Kushappa R Shinde",40000,"stp"],["2026-02-06","Sri Sai Swimming Pool",10000,"swimming"],
+["2026-02-07","Manjunatha Enterprises",16000,"bbmp"],
+["2026-02-08","Rajdeep Enterprises",5670,"fogging"],["2026-02-08","Elite Protection",48613,"security"],
+["2026-02-08","Rajdeep Enterprises",24500,"fogging"],
+["2026-02-09","Roshan Infra (Panel ATS)",8500,"others"],
+["2026-02-09","Elite Protection",63500,"security"],
+["2026-02-10","Elite Protection",50000,"security"],
+["2026-02-11","Sri Lakshmi Siddeshwara",94760,"water"],
+["2026-02-11","BESCOM 0745286501",46389,"electricity"],
+["2026-02-12","BESCOM 0257337691",52550,"electricity"],["2026-02-12","Salt for Softener",15000,"salt"],
+["2026-02-12","SAL Water Tanker",162800,"water"],
+["2026-03-02","Manager Salary",23000,"salary"],
+["2026-03-03","Jai Hanuman Battery",29000,"generator"],["2026-03-03","Parviom ParkPlus Stickers",14278,"barriers"],
+["2026-03-05","Sri Lakshmi Siddeshwara",89700,"water"],
+["2026-03-06","Sri Sai Swimming Pool",10000,"swimming"],["2026-03-06","Treis Solutions",16745,"generator"],
+["2026-03-06","Rajdeep Enterprises",24500,"fogging"],["2026-03-06","Salt for Softener",15000,"salt"],
+["2026-03-07","MR Enterprises",5537,"generator"],
+["2026-03-08","Treis Solutions",18567,"generator"],
+["2026-03-09","Elite Protection",49571,"security"],
+["2026-03-10","Elite Protection",70000,"security"],
+["2026-03-11","Manjunatha Enterprises",16000,"bbmp"],["2026-03-11","United Diesel",4228,"generator"],
+["2026-03-11","Elite Protection",37875,"security"],["2026-03-11","Kushappa R Shinde",40000,"stp"],
+["2026-03-13","Muneeswaran Electricals",3000,"others"],
+["2026-03-14","BESCOM 0257337691",53360,"electricity"],
+["2026-03-14","Muneeswaran Electricals",14000,"others"],
+["2026-03-14","Swimming Pool Welding",2300,"swimming"],
+["2026-03-15","BESCOM 0745286501",41466,"electricity"],
+["2026-03-16","Garbage Area Cleaning",8000,"others"],
+["2026-03-16","SAL Water Tanker",174900,"water"],
+["2026-03-17","Amazon (CCTV Monitor)",15010,"others"],
+["2026-03-23","Buymore (Dustbins)",51542,"others"],
+["2026-03-23","Lokamantri (STP Rework)",20000,"others"],
+["2026-03-24","Rajdeep (Garbage Plants)",12000,"others"],["2026-03-24","Amazon (Ladder)",11990,"others"],
+["2026-03-25","Lokamantri (STP Rework)",80000,"others"],
+["2026-03-26","Hydrotech (Pool Lights)",7434,"swimming"],
+["2026-03-27","Salt for Softener",15000,"salt"],["2026-03-27","Tilak Prasad (Staircase Lights)",12950,"others"]
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let selected = new Set(QUARTERS.map(q=>q.id));
+let txnSearch = "";
+let txnSortCol = 0;
+let txnSortAsc = false;
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════
+const fmt = n => {
+  if(Math.abs(n)>=10000000) return "\u20B9"+(n/10000000).toFixed(2)+"Cr";
+  if(Math.abs(n)>=100000) return "\u20B9"+(n/100000).toFixed(2)+"L";
+  return "\u20B9"+Math.round(n).toLocaleString("en-IN");
+};
+const fmtL = n => (n/100000).toFixed(2)+"L";
+const pct = (a,b) => b?((a-b)/b*100).toFixed(1):"\u2014";
+const pillClass = v => v>5?"up":v<-5?"dn":"fl";
+const sel = () => QUARTERS.filter(q=>selected.has(q.id));
+const totalMonths = () => sel().reduce((s,q)=>s+q.months,0);
+const totalSpend = () => sel().reduce((s,q)=>s+q.total,0);
+const totalReceipts = () => sel().reduce((s,q)=>s+q.receipts,0);
+const catTotal = c => sel().reduce((s,q)=>s+(q.cats[c]||0),0);
+const el = id => document.getElementById(id);
+
+const Q_MONTHS = {
+  q3fy25:{labels:["Nov 24","Dec 24"],start:"2024-11",end:"2024-12"},
+  q4fy25:{labels:["Jan 25","Feb 25","Mar 25"],start:"2025-01",end:"2025-03"},
+  q1fy26:{labels:["Apr 25","May 25","Jun 25"],start:"2025-04",end:"2025-06"},
+  q2fy26:{labels:["Jul 25","Aug 25","Sep 25"],start:"2025-07",end:"2025-09"},
+  q3fy26:{labels:["Oct 25","Nov 25","Dec 25"],start:"2025-10",end:"2025-12"},
+  q4fy26:{labels:["Jan 26","Feb 26","Mar 26"],start:"2026-01",end:"2026-03"}
+};
+const selMonthLabels = () => {
+  const s=new Set();
+  selected.forEach(id=>{if(Q_MONTHS[id]) Q_MONTHS[id].labels.forEach(l=>s.add(l))});
+  return s;
+};
+const selMonthly = () => {const s=selMonthLabels(); return MONTHLY.filter(m=>s.has(m.m))};
+const txnInRange = d => {const ym=d.substring(0,7); for(const id of selected){if(Q_MONTHS[id]&&ym>=Q_MONTHS[id].start&&ym<=Q_MONTHS[id].end) return true} return false};
+const selTxn = () => TXN.filter(t=>txnInRange(t[0]));
+
+const PURPOSE = {
+  "Gym Access Cards":"Access card replacement for residents",
+  "Gym Servicing":"Annual gym equipment servicing & repair",
+  "Ramesh Chandra":"Electrical/civil repair work",
+  "Hajib Trading":"Motor pump replacement",
+  "Hajib Trading (Motor)":"Motor pump replacement",
+  "Print 18":"Printing notices, AGM booklets, society docs",
+  "Roshan Infra":"Electrical panel & infrastructure repair",
+  "Roshan Infra (Panel ATS)":"Automatic Transfer Switch panel repair",
+  "Min Taj Uddin (Motor)":"Borewell motor replacement/repair",
+  "Munusamy (Mason)":"Mason work — civil repair",
+  "Motor Repair":"Motor/pump repair work",
+  "Lawyer Fees":"Legal consultation for society matters",
+  "Syscom CCTV":"CCTV camera repair & maintenance",
+  "Mayur Yadav (CCTV)":"CCTV camera installation/repair",
+  "Mayur Yadav":"CCTV camera installation/repair",
+  "Aluminium Work":"Aluminium fabrication for common area",
+  "Independence Day":"Independence Day celebration expenses",
+  "Republic Day":"Republic Day celebration expenses",
+  "Lokamantri Enviro (Softener)":"Water softener plant setup",
+  "B T Lokesha (Softener)":"Water softener material supply",
+  "OHT Cleaning":"Overhead tank cleaning — annual",
+  "Amazon (CCTV Monitor)":"CCTV monitoring screen purchase",
+  "Amazon (Ladder)":"Safety ladder for maintenance",
+  "Buymore (Dustbins)":"Bulk dustbin purchase for waste management",
+  "Lokamantri (STP Rework)":"STP plant rework & upgradation",
+  "Rajdeep (Garbage Plants)":"Garbage processing area plants",
+  "Hydrotech (Pool Lights)":"Swimming pool underwater lights",
+  "Jai Hanuman Battery":"Generator battery replacement",
+  "Parviom ParkPlus Stickers":"Parking sticker printing for vehicles",
+  "Tilak Prasad (Barrier Repair)":"Boom barrier repair work",
+  "Tilak Prasad (Staircase Lights)":"Staircase light fixture replacement",
+  "Tilak Prasad (Plumber)":"Plumbing emergency repair",
+  "Garbage Area Cleaning":"Deep cleaning of garbage area",
+  "Muneeswaran Electricals":"Electrical fixture/wiring repair",
+  "Swimming Pool Equipment":"Pool filter/pump parts",
+  "Swimming Pool Welding":"Pool railing welding repair",
+  "Cumins Genesis (Pool Water)":"Pool water treatment chemicals",
+  "Cumins Genesis":"Water purification chemicals",
+  "Krishna Hardware":"Plumbing hardware & materials",
+  "United Diesel":"Diesel supply for generator",
+  "In Hand Cash":"Petty cash for misc. small expenses",
+  "Mohammed Ameen":"Security/housekeeping misc. supplies",
+  "Misc SMS":"Bank SMS charges",
+  "Pavan Electricals":"Electrical wiring & fitting work",
+  "Pawan Electrical":"Plumbing pipeline work",
+  "Tilak Prasad":"Plumbing/electrical repair"
+};
+
+// ═══════════════════════════════════════════════════════════
+//  SECTIONS DEFINITION
+// ═══════════════════════════════════════════════════════════
+const SECTIONS = [
+  {id:"overview",   label:"Overview",          icon:"\u25A3"},
+  {id:"quarterly",  label:"Quarterly Timeline", icon:"\u2593"},
+  {id:"monthly",    label:"Monthly Breakdown",  icon:"\uD83D\uDCC5"},
+  {id:"categories", label:"Category Analysis",  icon:"\u25C9"},
+  {id:"heatmap",    label:"Spending Heatmap",   icon:"\uD83D\uDD25"},
+  {id:"yoy",        label:"Year-over-Year",     icon:"\u21C5"},
+  {id:"cumulative", label:"Cumulative Trend",   icon:"\u2197"},
+  {id:"onetime",    label:"One-Time Expenses",  icon:"\u26A1"},
+  {id:"topspends",  label:"Top Payments",       icon:"\uD83C\uDFC6"},
+  {id:"txns",       label:"Transactions",       icon:"\u2261"},
+  {id:"insights",   label:"Key Insights",       icon:"\u2605"}
+];
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════════════════
+function renderAll(){
+  const qs=sel(), mo=totalMonths(), ts=totalSpend(), tr=totalReceipts();
+  const firstSel=qs[0], lastSel=qs[qs.length-1];
+  el("headerSub").textContent=`${firstSel.label} \u2013 ${lastSel.label} | ${qs.length} Period${qs.length>1?"s":""} Selected | ${mo} Months`;
+  el("footer").textContent=`Srimitra Lifestyle \u00B7 Expenditure Dashboard \u00B7 ${QUARTERS[0].label} \u2013 ${QUARTERS[QUARTERS.length-1].label} (${totalMonths()} Months) \u00B7 Generated from bank transaction records`;
+
+  let h="";
+  h+=renderStats(qs,mo,ts,tr);
+  h+=`<section id="sec-overview"><div class="sec-title">Overview</div><div class="sec-desc">Key financial metrics for the selected period.</div>`;
+  h+=renderOverviewCharts(qs);
+  h+=`</section>`;
+  h+=`<section id="sec-quarterly"><div class="sec-title">Quarterly Timeline</div><div class="sec-desc">Period-by-period summary with quarter-over-quarter changes.</div>`;
+  h+=renderQuarterlyBars(qs);
+  h+=renderPeriodTable(qs,mo,ts,tr);
+  h+=`</section>`;
+  h+=`<section id="sec-monthly"><div class="sec-title">Monthly Breakdown</div><div class="sec-desc">Individual month-by-month spending for granular analysis. Dashed line shows the overall average.</div>`;
+  h+=renderMonthlyBreakdown();
+  h+=`</section>`;
+  h+=`<section id="sec-categories"><div class="sec-title">Category Analysis</div><div class="sec-desc">Spending breakdown by category across all selected quarters.</div>`;
+  h+=renderCategorySection(qs,ts);
+  h+=`</section>`;
+  h+=`<section id="sec-heatmap"><div class="sec-title">Spending Heatmap</div><div class="sec-desc">Category x Month intensity grid. Darker cells = higher spending. Hover for details.</div>`;
+  h+=renderHeatmap();
+  h+=`</section>`;
+  h+=`<section id="sec-yoy"><div class="sec-title">Year-over-Year Comparison</div><div class="sec-desc">Same-quarter comparison across years to identify structural cost changes.</div>`;
+  h+=renderYoY();
+  h+=`</section>`;
+  h+=`<section id="sec-cumulative"><div class="sec-title">Cumulative Spending Trend</div><div class="sec-desc">Running total of expenditure across ${selMonthly().length} selected months. Dashed line shows the average.</div>`;
+  h+=`<div class="line-chart" id="lineChartWrap"></div>`;
+  h+=`</section>`;
+  h+=`<section id="sec-onetime"><div class="sec-title">Recurring vs One-Time Expenses</div><div class="sec-desc">Recurring = vendor appears in 3+ different months (contracts/subscriptions). One-time = ad-hoc purchases, repairs, events, and capital items.</div>`;
+  h+=renderOneTimeAnalysis();
+  h+=`</section>`;
+  h+=`<section id="sec-topspends"><div class="sec-title">Top 10 Biggest Payments</div><div class="sec-desc">The single largest transactions across the entire period.</div>`;
+  h+=renderTopSpends();
+  h+=`</section>`;
+  h+=`<section id="sec-txns"><div class="sec-title">Transaction Search</div><div class="sec-desc">Search, sort, and filter ${selTxn().length} transactions for the selected period.</div>`;
+  h+=`<div class="search-bar"><input class="search-input" id="txnSearchInput" placeholder="Search vendor, category..." oninput="onTxnSearch(this.value)"><span class="search-count" id="txnCount"></span></div>`;
+  h+=`<div id="txnTableWrap"></div>`;
+  h+=`</section>`;
+  h+=`<section id="sec-insights"><div class="sec-title">Key Insights &amp; Recommendations</div><div class="sec-desc">Findings from the full expenditure analysis.</div>`;
+  h+=renderInsights(qs,mo,ts);
+  h+=`</section>`;
+  el("content").innerHTML=h;
+  renderLineChart();
+  renderTxnTable();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════════════════════
+function renderStats(qs,mo,ts,tr){
+  const avg=ts/mo, last=qs[qs.length-1];
+  const dailyBurn=Math.round(ts/(mo*30.44));
+  const peakMonth=MONTHLY.reduce((a,b)=>b.v>a.v?b:a,MONTHLY[0]);
+  const lowMonth=MONTHLY.reduce((a,b)=>b.v<a.v?b:a,MONTHLY[0]);
+  const projected=avg*12;
+  return `<div class="stats stats-4">
+    <div class="stat stat-accent" style="border-color:var(--accent)"><div class="stat-v">${fmt(ts)}</div><div class="stat-l">Total Expenditure (${mo} mo)</div><div class="stat-mini">${fmt(dailyBurn)}/day burn rate</div></div>
+    <div class="stat stat-accent" style="border-color:var(--green)"><div class="stat-v n">${fmt(avg)}</div><div class="stat-l">Monthly Average</div><div class="stat-mini">Projected: ${fmt(projected)}/year</div></div>
+    <div class="stat stat-accent" style="border-color:var(--amber)"><div class="stat-v" style="color:var(--red)">${fmt(peakMonth.v)}</div><div class="stat-l">Peak: ${peakMonth.m}</div><div class="stat-mini">Low: ${lowMonth.m} (${fmt(lowMonth.v)})</div></div>
+    <div class="stat stat-accent" style="border-color:var(--blue)"><div class="stat-v up">${fmt(last.total)}</div><div class="stat-l">Latest: ${last.label}</div><div class="stat-mini">${fmt(last.total/last.months)}/mo avg</div></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OVERVIEW CHARTS
+// ═══════════════════════════════════════════════════════════
+function renderOverviewCharts(qs){
+  const maxAvg=Math.max(...qs.map(q=>q.total/q.months));
+  let barsH=`<div class="box"><div class="box-title">Monthly Average per Quarter</div><div>`;
+  qs.forEach(q=>{
+    const avg=q.total/q.months, w=Math.round(avg/maxAvg*100);
+    const col=avg===maxAvg?"var(--red)":avg===Math.min(...qs.map(x=>x.total/x.months))?"var(--green)":"";
+    barsH+=`<div class="hbar-row"><div class="hbar-label">${q.label}</div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:var(--accent);border-radius:5px"></div></div><div class="hbar-val"${col?` style="color:${col}"`:``}>${fmt(q.total/q.months)}</div></div>`;
   });
-});
+  barsH+=`</div></div>`;
+
+  const maxR=Math.max(...qs.map(q=>q.receipts));
+  let recH=`<div class="box"><div class="box-title">Receipts per Quarter</div><div>`;
+  qs.forEach(q=>{
+    const w=maxR?Math.max(2,Math.round(q.receipts/maxR*100)):2;
+    recH+=`<div class="hbar-row"><div class="hbar-label">${q.label}</div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:var(--green);border-radius:5px"></div></div><div class="hbar-val">${fmt(q.receipts)}</div></div>`;
+  });
+  recH+=`</div></div>`;
+  return `<div class="grid2">${barsH}${recH}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  QUARTERLY BARS
+// ═══════════════════════════════════════════════════════════
+function renderQuarterlyBars(qs){
+  const max=Math.max(...qs.map(q=>q.total));
+  const colors=["#4338ca","#4f46e5","#6366f1","#7c3aed","#8b5cf6","#9333ea","#a855f7","#c084fc"];
+  let h=`<div class="box" style="margin-bottom:16px"><div class="box-title">Quarterly Spending</div><div class="spark-row" style="grid-template-columns:repeat(${qs.length},1fr)">`;
+  qs.forEach((q,i)=>{
+    const pctH=Math.round(q.total/max*100);
+    const isMax=q.total===max;
+    h+=`<div class="spark-col"><div class="spark-area"><div class="spark-bar" style="height:${pctH}%;background:linear-gradient(to top,${colors[i%colors.length]},${colors[(i+1)%colors.length]})"><span class="sv"${isMax?' style="color:var(--red)"':''}>${fmt(q.total)}</span></div></div><div class="spark-lbl">${q.label.split("\u2013")[0]}</div><div class="spark-sub">${q.label.includes("2024")?"2024":q.label.includes("2025")?"2025":"2026"}${q.months===2?" (2mo)":""}</div></div>`;
+  });
+  h+=`</div></div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PERIOD TABLE
+// ═══════════════════════════════════════════════════════════
+function renderPeriodTable(qs,mo,ts,tr){
+  let h=`<div class="tw"><table><thead><tr><th>Period</th><th>Mo</th><th class="num">Total</th><th class="num">Monthly Avg</th><th class="num">Receipts</th><th class="num">Net</th><th class="num">QoQ</th></tr></thead><tbody>`;
+  qs.forEach((q,i)=>{
+    const prev=i>0?qs[i-1]:null;
+    const chg=prev?pct(q.total,prev.total):null;
+    const pc=chg!==null?pillClass(+chg):"fl";
+    h+=`<tr><td><strong>${q.label}</strong></td><td>${q.months}</td><td class="num">${fmt(q.total)}</td><td class="num">${fmt(q.total/q.months)}</td><td class="num">${fmt(q.receipts)}</td><td class="num">${fmt(q.total-q.receipts)}</td><td class="num">${chg!==null?`<span class="pill ${pc}">${+chg>0?"+":""}${chg}%</span>`:`<span class="pill fl">Base</span>`}</td></tr>`;
+  });
+  h+=`<tr class="tr-total"><td><strong>TOTAL</strong></td><td>${mo}</td><td class="num"><strong>${fmt(ts)}</strong></td><td class="num"><strong>${fmt(ts/mo)}</strong></td><td class="num"><strong>${fmt(tr)}</strong></td><td class="num"><strong>${fmt(ts-tr)}</strong></td><td></td></tr>`;
+  h+=`</tbody></table></div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CATEGORY SECTION
+// ═══════════════════════════════════════════════════════════
+function renderCategorySection(qs,ts){
+  const cats=Object.keys(CAT_META);
+  const totals=cats.map(c=>({key:c,...CAT_META[c],total:catTotal(c)})).sort((a,b)=>b.total-a.total);
+  const top5=totals.slice(0,6), rest=totals.slice(6);
+  const restSum=rest.reduce((s,c)=>s+c.total,0);
+
+  // Donut
+  const donutData=[...top5,{key:"_rest",label:"All Others",color:"#6b7280",total:restSum}];
+  const circ=2*Math.PI*80;
+  let offset=circ*0.25;
+  let arcs="";
+  donutData.forEach(d=>{
+    const share=d.total/ts;
+    const dash=share*circ;
+    arcs+=`<circle cx="100" cy="100" r="80" fill="none" stroke="${d.color}" stroke-width="28" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" transform="rotate(-90 100 100)"/>`;
+    offset-=dash;
+  });
+  let legendH=donutData.map(d=>`<div class="legend-row"><span class="legend-dot" style="background:${d.color}"></span><span class="legend-name">${d.label}</span><span class="legend-val">${(d.total/ts*100).toFixed(1)}%</span></div>`).join("");
+
+  let donut=`<div class="box"><div class="box-title">Spending Distribution</div><div class="donut-wrap">
+    <svg width="180" height="180" viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="none" stroke="var(--border)" stroke-width="28"/>${arcs}<circle cx="100" cy="100" r="58" fill="var(--surface)"/><text x="100" y="96" text-anchor="middle" style="font-size:16px;font-weight:700;fill:var(--text)">${fmt(ts)}</text><text x="100" y="112" text-anchor="middle" style="font-size:10px;fill:var(--text3)">TOTAL</text></svg>
+    <div class="legend">${legendH}</div></div></div>`;
+
+  // Category trend table
+  let tbl=`<div class="tw"><table><thead><tr><th>Category</th>`;
+  qs.forEach(q=>tbl+=`<th class="num">${q.label.replace(/\u2013/g,"\u2013").substring(0,7)}</th>`);
+  tbl+=`<th class="num">Total</th><th class="num">Share</th><th style="width:80px">Trend</th></tr></thead><tbody>`;
+  totals.forEach(c=>{
+    const vals=qs.map(q=>q.cats[c.key]||0);
+    const catMax=Math.max(...vals,1);
+    const first=vals[0],last=vals[vals.length-1];
+    const trend=first>0?((last-first)/first*100).toFixed(0):last>0?"+new":"flat";
+    const trendColor=+trend>5?"var(--red)":+trend<-5?"var(--green)":"var(--text3)";
+    const sparkSvg=vals.length>1?`<svg width="70" height="20" viewBox="0 0 70 20">${vals.map((v,i)=>{const bw=Math.max(2,60/vals.length-1);return`<rect x="${i*(70/vals.length)}" y="${20-Math.max(1,v/catMax*18)}" width="${bw}" height="${Math.max(1,v/catMax*18)}" fill="${c.color}" rx="1" opacity="${0.4+0.6*(v/catMax)}"/>`}).join("")}</svg>`:"";
+    tbl+=`<tr><td><span class="cat-dot" style="background:${c.color}"></span><strong>${c.label}</strong></td>`;
+    qs.forEach(q=>tbl+=`<td class="num">${fmt(q.cats[c.key]||0)}</td>`);
+    tbl+=`<td class="num"><strong>${fmt(c.total)}</strong></td><td class="num">${(c.total/ts*100).toFixed(1)}%</td><td style="text-align:center">${sparkSvg}</td></tr>`;
+  });
+  tbl+=`</tbody></table></div>`;
+
+  // Top bars
+  const maxCat=totals[0].total;
+  let bars=`<div class="box"><div class="box-title">Top Categories</div>`;
+  totals.slice(0,5).forEach(c=>{
+    const w=Math.round(c.total/maxCat*100);
+    bars+=`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;font-weight:600"><span class="cat-dot" style="background:${c.color}"></span>${c.label}</span><span style="font-size:12px;font-weight:700;color:${c.color}">${fmt(c.total)}</span></div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:${c.color};border-radius:5px"></div></div><div style="font-size:9px;color:var(--text3);margin-top:2px">${(c.total/ts*100).toFixed(1)}% of total | ${fmt(c.total/totalMonths())}/month</div></div>`;
+  });
+  bars+=`</div>`;
+
+  return `<div class="grid2">${donut}${bars}</div>${tbl}`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MONTHLY BREAKDOWN
+// ═══════════════════════════════════════════════════════════
+function renderMonthlyBreakdown(){
+  const fm=selMonthly();
+  if(fm.length===0) return `<div class="box"><p style="color:var(--text3);font-size:12px">No monthly data for the selected quarters.</p></div>`;
+  const max=Math.max(...fm.map(m=>m.v));
+  const min=Math.min(...fm.map(m=>m.v));
+  const avg=fm.reduce((s,m)=>s+m.v,0)/fm.length;
+  const avgPct=Math.round(avg/max*100);
+  const cols=fm.length;
+
+  let h=`<div class="box" style="margin-bottom:16px"><div class="box-title">Monthly Spending (${fm.length} months)</div>`;
+  h+=`<div class="month-bar-wrap">`;
+  h+=`<div class="month-avg-line" style="bottom:${avgPct}%;"><span class="month-avg-label">Avg: ${fmt(avg)}</span></div>`;
+  h+=`<div class="spark-row" style="grid-template-columns:repeat(${cols},1fr)">`;
+  fm.forEach(m=>{
+    const pctH=Math.round(m.v/max*100);
+    const isMax=m.v===max, isMin=m.v===min;
+    const color=isMax?"var(--red)":isMin?"var(--green)":"var(--accent2)";
+    const bg=isMax?"linear-gradient(to top,#dc2626,#ef4444)":isMin?"linear-gradient(to top,#059669,#34d399)":"linear-gradient(to top,var(--accent),var(--accent2))";
+    h+=`<div class="spark-col"><div class="spark-area" style="height:140px"><div class="spark-bar" style="height:${pctH}%;background:${bg};width:28px"><span class="sv" style="color:${color};font-size:8px">${fmtL(m.v)}</span></div></div><div class="spark-lbl" style="font-size:9px">${m.m.split(" ")[0].substring(0,3)}</div><div class="spark-sub">${m.m.split(" ")[1]||""}</div></div>`;
+  });
+  h+=`</div></div></div>`;
+
+  h+=`<div class="grid2">`;
+  h+=`<div class="box"><div class="box-title">Month-wise Details</div>`;
+  h+=`<div class="tw"><table><thead><tr><th>Month</th><th class="num">Spending</th><th class="num">Daily Avg</th><th class="num">MoM Change</th></tr></thead><tbody>`;
+  fm.forEach((m,i)=>{
+    const prev=i>0?fm[i-1]:null;
+    const chg=prev?pct(m.v,prev.v):null;
+    const pc=chg!==null?pillClass(+chg):"fl";
+    const daily=Math.round(m.v/30.44);
+    const isMax=m.v===max, isMin=m.v===min;
+    const style=isMax?' style="background:var(--red-bg)"':isMin?' style="background:var(--green-bg)"':"";
+    h+=`<tr${style}><td><strong>${m.m}</strong>${isMax?' <span class="pill up">HIGHEST</span>':''}${isMin?' <span class="pill dn">LOWEST</span>':''}</td><td class="num">${fmt(m.v)}</td><td class="num">${fmt(daily)}</td><td class="num">${chg!==null?`<span class="pill ${pc}">${+chg>0?"+":""}${chg}%</span>`:`<span class="pill fl">Base</span>`}</td></tr>`;
+  });
+  h+=`</tbody></table></div></div>`;
+
+  h+=`<div class="box"><div class="box-title">Monthly Highlights</div>`;
+  const sorted=[...fm].sort((a,b)=>b.v-a.v);
+  const topN=Math.min(5,sorted.length);
+  h+=`<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2)">Top ${topN} Costliest Months</div>`;
+  sorted.slice(0,topN).forEach((m,i)=>{
+    const w=Math.round(m.v/max*100);
+    h+=`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px"><strong>#${i+1}</strong> ${m.m}</span><span style="font-size:11px;font-weight:700;color:var(--red)">${fmt(m.v)}</span></div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:linear-gradient(90deg,var(--red),#fca5a5);border-radius:5px"></div></div></div>`;
+  });
+  h+=`</div>`;
+  const botN=Math.min(5,sorted.length);
+  h+=`<div><div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2)">Top ${botN} Lowest Months</div>`;
+  sorted.slice(-botN).reverse().forEach((m,i)=>{
+    const w=Math.round(m.v/max*100);
+    h+=`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px"><strong>#${i+1}</strong> ${m.m}</span><span style="font-size:11px;font-weight:700;color:var(--green)">${fmt(m.v)}</span></div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:linear-gradient(90deg,var(--green),#a7f3d0);border-radius:5px"></div></div></div>`;
+  });
+  h+=`</div></div>`;
+  h+=`</div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SPENDING HEATMAP (Category x Month)
+// ═══════════════════════════════════════════════════════════
+function renderHeatmap(){
+  const cats=Object.keys(CAT_META).filter(c=>catTotal(c)>0);
+  cats.sort((a,b)=>catTotal(b)-catTotal(a));
+  const fm=selMonthly();
+  if(fm.length===0) return `<div class="box"><p style="color:var(--text3);font-size:12px">No data for the selected quarters.</p></div>`;
+  const monthLabels=fm.map(m=>m.m);
+  const ft=selTxn();
+  const monthTxnTotals={};
+  ft.forEach(t=>{
+    const d=new Date(t[0]);
+    const key=d.toLocaleString("en-US",{month:"short"})+" "+String(d.getFullYear()).slice(2);
+    if(!monthTxnTotals[key]) monthTxnTotals[key]={};
+    if(!monthTxnTotals[key][t[3]]) monthTxnTotals[key][t[3]]=0;
+    monthTxnTotals[key][t[3]]+=t[2];
+  });
+
+  let allVals=[];
+  cats.forEach(c=>{
+    monthLabels.forEach(ml=>{
+      const v=monthTxnTotals[ml]?.[c]||0;
+      if(v>0) allVals.push(v);
+    });
+  });
+  const maxVal=Math.max(...allVals,1);
+
+  const gridCols=`80px repeat(${monthLabels.length},1fr)`;
+  const minW=80+monthLabels.length*44;
+  let h=`<div class="box"><div class="box-title">Category x Month Heatmap</div>`;
+  h+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="heatmap" style="grid-template-columns:${gridCols};min-width:${minW}px">`;
+  h+=`<div class="hm-header"></div>`;
+  monthLabels.forEach(ml=>h+=`<div class="hm-header">${ml.split(" ")[0].substring(0,3)}<br>${ml.split(" ")[1]||""}</div>`);
+
+  cats.forEach(c=>{
+    const meta=CAT_META[c];
+    h+=`<div class="hm-row-label"><span class="cat-dot" style="background:${meta.color}"></span>${meta.label.substring(0,12)}</div>`;
+    monthLabels.forEach(ml=>{
+      const v=monthTxnTotals[ml]?.[c]||0;
+      const intensity=v>0?Math.max(0.1,Math.min(1,v/maxVal)):0;
+      const r=parseInt(meta.color.slice(1,3),16);
+      const g=parseInt(meta.color.slice(3,5),16);
+      const b=parseInt(meta.color.slice(5,7),16);
+      const bg=v>0?`rgba(${r},${g},${b},${(intensity*0.7+0.1).toFixed(2)})`:"transparent";
+      const textColor=intensity>0.4?"#fff":"var(--text3)";
+      h+=`<div class="hm-cell" style="background:${bg};color:${textColor}" title="${meta.label} | ${ml}: ${fmt(v)}">${v>0?fmtL(v):""}</div>`;
+    });
+  });
+  h+=`</div>`;
+  h+=`</div></div>`;
+  h+=`<div class="hm-legend"><span>Low</span><div class="hm-legend-bar"></div><span>High</span></div>`;
+  h+=`</div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RECURRING vs ONE-TIME ANALYSIS
+// ═══════════════════════════════════════════════════════════
+function renderOneTimeAnalysis(){
+  const ft=selTxn();
+  if(ft.length===0) return `<div class="box"><p style="color:var(--text3);font-size:12px">No transactions for the selected quarters.</p></div>`;
+  const vendorMonths={};
+  ft.forEach(t=>{
+    const v=t[1].replace(/\s*\(.*?\)/g,"").trim();
+    const m=t[0].substring(0,7);
+    if(!vendorMonths[v]) vendorMonths[v]={months:new Set(),total:0,txns:[],cat:t[3]};
+    vendorMonths[v].months.add(m);
+    vendorMonths[v].total+=t[2];
+    vendorMonths[v].txns.push(t);
+  });
+
+  let recurringTotal=0, onetimeTotal=0;
+  const onetimeItems=[], recurringItems=[];
+  Object.entries(vendorMonths).forEach(([vendor,data])=>{
+    const isRecurring=data.months.size>=3;
+    if(isRecurring){
+      recurringTotal+=data.total;
+      recurringItems.push({vendor,total:data.total,count:data.txns.length,months:data.months.size,cat:data.cat});
+    } else {
+      onetimeTotal+=data.total;
+      data.txns.forEach(t=>onetimeItems.push({vendor:t[1],amount:t[2],date:t[0],cat:t[3],vendorMonths:data.months.size}));
+    }
+  });
+  onetimeItems.sort((a,b)=>b.amount-a.amount);
+
+  const grand=recurringTotal+onetimeTotal;
+  const rPct=(recurringTotal/grand*100).toFixed(1);
+  const oPct=(onetimeTotal/grand*100).toFixed(1);
+
+  let h=`<div class="stats stats-3">
+    <div class="stat stat-accent" style="border-color:var(--accent)"><div class="stat-v">${fmt(recurringTotal)}</div><div class="stat-l">Recurring (${rPct}%)</div><div class="stat-mini">${recurringItems.length} vendors, 3+ months</div></div>
+    <div class="stat stat-accent" style="border-color:var(--amber)"><div class="stat-v" style="color:var(--amber)">${fmt(onetimeTotal)}</div><div class="stat-l">One-Time / Ad-hoc (${oPct}%)</div><div class="stat-mini">${onetimeItems.length} transactions</div></div>
+    <div class="stat stat-accent" style="border-color:var(--green)"><div class="stat-v n">${fmt(grand)}</div><div class="stat-l">Total Tracked</div><div class="stat-mini">${ft.length} transactions</div></div>
+  </div>`;
+
+  h+=`<div class="split-bar"><div class="split-seg" style="width:${rPct}%;background:linear-gradient(90deg,var(--accent),var(--accent2))">${rPct}% Recurring</div><div class="split-seg" style="width:${oPct}%;background:linear-gradient(90deg,var(--amber),#f59e0b)">${oPct}% One-Time</div></div>`;
+
+  h+=`<div class="grid2">`;
+
+  // One-time expenses list
+  h+=`<div class="box"><div class="box-title">One-Time &amp; Ad-Hoc Expenses (${onetimeItems.length} items — ${fmt(onetimeTotal)})</div>`;
+  const grouped={};
+  onetimeItems.forEach(item=>{
+    const label=item.amount>=20000?"Major Purchase/Repair":item.amount>=5000?"Moderate Expense":"Minor Expense";
+    if(!grouped[label]) grouped[label]=[];
+    grouped[label].push(item);
+  });
+  Object.entries(grouped).forEach(([label,items])=>{
+    const groupTotal=items.reduce((s,i)=>s+i.amount,0);
+    h+=`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between"><span>${label} (${items.length})</span><span>${fmt(groupTotal)}</span></div>`;
+    items.forEach(item=>{
+      const meta=CAT_META[item.cat]||CAT_META.others;
+      const purpose=PURPOSE[item.vendor]||PURPOSE[item.vendor.replace(/\s*\(.*?\)/g,"").trim()]||"";
+      h+=`<div class="ot-card"><div class="ot-left"><div class="ot-icon" style="background:${meta.color}22;color:${meta.color}"><span class="cat-dot" style="background:${meta.color};width:10px;height:10px"></span></div><div><div class="ot-name">${item.vendor}</div><div class="ot-meta">${item.date} · ${meta.label}${purpose?` · <em>${purpose}</em>`:""}</div></div></div><div class="ot-amount" style="color:${meta.color}">${fmt(item.amount)}</div></div>`;
+    });
+    h+=`</div>`;
+  });
+  h+=`</div>`;
+
+  // Recurring contracts summary
+  recurringItems.sort((a,b)=>b.total-a.total);
+  const maxRec=recurringItems[0]?.total||1;
+  h+=`<div class="box"><div class="box-title">Recurring Contracts (${recurringItems.length} vendors — ${fmt(recurringTotal)})</div>`;
+  recurringItems.forEach(r=>{
+    const meta=CAT_META[r.cat]||CAT_META.others;
+    const w=Math.round(r.total/maxRec*100);
+    const monthly=Math.round(r.total/r.months);
+    h+=`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px;font-weight:600"><span class="cat-dot" style="background:${meta.color}"></span>${r.vendor}</span><span style="font-size:11px;font-weight:700">${fmt(r.total)}</span></div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:${meta.color};border-radius:5px"></div></div><div style="font-size:9px;color:var(--text3);margin-top:1px">${r.count} txns over ${r.months} months · ~${fmt(monthly)}/mo</div></div>`;
+  });
+  h+=`</div>`;
+
+  h+=`</div>`;
+
+  // One-time by category pie
+  const otByCat={};
+  onetimeItems.forEach(i=>{
+    if(!otByCat[i.cat]) otByCat[i.cat]=0;
+    otByCat[i.cat]+=i.amount;
+  });
+  const otCats=Object.entries(otByCat).sort((a,b)=>b[1]-a[1]);
+  h+=`<div class="box" style="margin-top:10px"><div class="box-title">One-Time Expenses by Category</div>`;
+  const maxOtCat=otCats[0]?.[1]||1;
+  otCats.forEach(([cat,total])=>{
+    const meta=CAT_META[cat]||CAT_META.others;
+    const w=Math.round(total/maxOtCat*100);
+    h+=`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px;font-weight:600"><span class="cat-dot" style="background:${meta.color}"></span>${meta.label}</span><span style="font-size:11px;font-weight:700;color:${meta.color}">${fmt(total)} <span style="color:var(--text3);font-weight:400">(${(total/onetimeTotal*100).toFixed(1)}%)</span></span></div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:${meta.color};border-radius:5px"></div></div></div>`;
+  });
+  h+=`</div>`;
+
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOP PAYMENTS
+// ═══════════════════════════════════════════════════════════
+function renderTopSpends(){
+  const ft=selTxn();
+  if(ft.length===0) return `<div class="box"><p style="color:var(--text3);font-size:12px">No transactions for the selected quarters.</p></div>`;
+  const sorted=[...ft].sort((a,b)=>b[2]-a[2]);
+  const top=sorted.slice(0,10);
+  let h=`<div class="top-grid">`;
+  top.slice(0,5).forEach((t,i)=>{
+    const meta=CAT_META[t[3]]||CAT_META.others;
+    h+=`<div class="top-card" style="border-top:3px solid ${meta.color}"><div class="top-rank">#${i+1}</div><div class="top-amt">${fmt(t[2])}</div><div class="top-vendor">${t[1]}</div><div class="top-detail">${t[0]} &bull; ${meta.label}</div></div>`;
+  });
+  h+=`</div>`;
+  if(top.length>5){
+    h+=`<div class="top-grid">`;
+    top.slice(5,10).forEach((t,i)=>{
+      const meta=CAT_META[t[3]]||CAT_META.others;
+      h+=`<div class="top-card" style="border-top:3px solid ${meta.color}"><div class="top-rank">#${i+6}</div><div class="top-amt">${fmt(t[2])}</div><div class="top-vendor">${t[1]}</div><div class="top-detail">${t[0]} &bull; ${meta.label}</div></div>`;
+    });
+    h+=`</div>`;
+  }
+
+  const catTotals={};
+  ft.forEach(t=>{
+    if(!catTotals[t[3]]) catTotals[t[3]]={count:0,total:0,max:0,maxVendor:""};
+    catTotals[t[3]].count++;
+    catTotals[t[3]].total+=t[2];
+    if(t[2]>catTotals[t[3]].max){catTotals[t[3]].max=t[2];catTotals[t[3]].maxVendor=t[1]}
+  });
+  h+=`<div class="box" style="margin-top:14px"><div class="box-title">Vendor Concentration</div>`;
+  const vendorTotals={};
+  ft.forEach(t=>{
+    const v=t[1].replace(/\s*\(.*?\)/g,"").trim();
+    if(!vendorTotals[v]) vendorTotals[v]={total:0,count:0,cat:t[3]};
+    vendorTotals[v].total+=t[2];
+    vendorTotals[v].count++;
+  });
+  const topVendors=Object.entries(vendorTotals).sort((a,b)=>b[1].total-a[1].total).slice(0,8);
+  const maxVendor=topVendors[0][1].total;
+  topVendors.forEach(([name,data])=>{
+    const meta=CAT_META[data.cat]||CAT_META.others;
+    const w=Math.round(data.total/maxVendor*100);
+    h+=`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:11px;font-weight:600">${name}</span><span style="font-size:11px;font-weight:700">${fmt(data.total)} <span style="color:var(--text3);font-weight:400">(${data.count} txns)</span></span></div><div class="hbar-track"><div class="hbar-fill" style="width:${w}%;background:${meta.color};border-radius:5px"></div></div></div>`;
+  });
+  h+=`</div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  YEAR-OVER-YEAR
+// ═══════════════════════════════════════════════════════════
+function renderYoY(){
+  const qs=sel();
+  const pairs=[];
+  qs.forEach((q,i)=>{
+    qs.forEach((q2,j)=>{
+      if(j>i && q.months===q2.months && q.label.split(" ")[0]===q2.label.split(" ")[0] && q.label.split(" ")[0].includes("\u2013")){
+        pairs.push({older:q,newer:q2});
+      }
+    });
+  });
+  const janMarOld=qs.find(q=>q.id==="q4fy25");
+  const janMarNew=qs.find(q=>q.id==="q4fy26");
+  if(janMarOld&&janMarNew&&!pairs.find(p=>p.older.id===janMarOld.id)){
+    pairs.push({older:janMarOld,newer:janMarNew});
+  }
+
+  if(pairs.length===0) return `<div class="box"><p style="color:var(--text3);font-size:12px">Select matching quarters (e.g. Jan\u2013Mar 2025 + Jan\u2013Mar 2026) to see year-over-year comparison.</p></div>`;
+
+  let h="";
+  pairs.forEach(({older,newer})=>{
+    const chg=pct(newer.total,older.total);
+    h+=`<div class="box" style="margin-bottom:14px"><div class="box-title">${older.label} vs ${newer.label}</div>`;
+    h+=`<div class="stats stats-3" style="margin-bottom:12px">
+      <div class="stat"><div class="stat-v">${fmt(older.total)}</div><div class="stat-l">${older.label}</div></div>
+      <div class="stat"><div class="stat-v">${fmt(newer.total)}</div><div class="stat-l">${newer.label}</div></div>
+      <div class="stat"><div class="stat-v ${pillClass(+chg)}">${+chg>0?"+":""}${chg}%</div><div class="stat-l">YoY Change</div></div>
+    </div>`;
+    const cats=Object.keys(CAT_META).filter(c=>(older.cats[c]||0)+(newer.cats[c]||0)>0);
+    h+=`<div class="tw"><table><thead><tr><th>Category</th><th class="num">${older.label}</th><th class="num">${newer.label}</th><th class="num">Change</th></tr></thead><tbody>`;
+    cats.sort((a,b)=>((newer.cats[b]||0)+(older.cats[b]||0))-((newer.cats[a]||0)+(older.cats[a]||0)));
+    cats.forEach(c=>{
+      const o=older.cats[c]||0,n=newer.cats[c]||0;
+      const ch=o?pct(n,o):n>0?"+new":"\u2014";
+      const pc=typeof ch==="string"&&ch!=="\u2014"?pillClass(parseFloat(ch)):"fl";
+      h+=`<tr><td><span class="cat-dot" style="background:${CAT_META[c].color}"></span>${CAT_META[c].label}</td><td class="num">${fmt(o)}</td><td class="num">${fmt(n)}</td><td class="num"><span class="pill ${pc}">${typeof ch==="string"?ch:(+ch>0?"+":"")+ch+"%"}</span></td></tr>`;
+    });
+    h+=`</tbody></table></div></div>`;
+  });
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CUMULATIVE LINE CHART
+// ═══════════════════════════════════════════════════════════
+function renderLineChart(){
+  const wrap=el("lineChartWrap");
+  if(!wrap)return;
+  const fm=selMonthly();
+  if(fm.length===0){wrap.innerHTML=`<p style="color:var(--text3);font-size:12px;padding:16px">No data for the selected quarters.</p>`;return}
+  const W=800,H=280,PL=60,PR=20,PT=30,PB=40;
+  const cw=W-PL-PR, ch=H-PT-PB;
+  let cum=0;
+  const pts=fm.map((m,i)=>{cum+=m.v;return{...m,cum,i}});
+  const maxY=pts[pts.length-1].cum;
+  const avg=cum/fm.length;
+  const x=i=>PL+i/(pts.length-1)*cw;
+  const y=v=>PT+ch-(v/maxY)*ch;
+
+  let gridLines="";
+  for(let i=0;i<=4;i++){
+    const val=maxY/4*i;
+    gridLines+=`<line x1="${PL}" y1="${y(val)}" x2="${W-PR}" y2="${y(val)}" class="grid-line"/>`;
+    gridLines+=`<text x="${PL-8}" y="${y(val)+4}" text-anchor="end" style="font-size:9px">${fmt(val)}</text>`;
+  }
+  let xLabels=pts.map((p,i)=>i%2===0||i===pts.length-1?`<text x="${x(i)}" y="${H-8}" text-anchor="middle" style="font-size:9px">${p.m}</text>`:"").join("");
+  const path=pts.map((p,i)=>`${i===0?"M":"L"}${x(i).toFixed(1)},${y(p.cum).toFixed(1)}`).join(" ");
+  const avgY=y(avg*MONTHLY.length/2);
+  let dots=pts.map((p,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(p.cum).toFixed(1)}" r="3.5" class="dot" data-tip="${p.m}: ${fmt(p.v)} | Cumulative: ${fmt(p.cum)}"/>`).join("");
+
+  wrap.innerHTML=`<div class="box-title">Cumulative Expenditure (${fmt(cum)} over ${fm.length} months)</div>
+    <div style="position:relative"><svg viewBox="0 0 ${W} ${H}">${gridLines}
+    <line x1="${PL}" y1="${y(avg*(pts.length))}" x2="${W-PR}" y2="${y(avg)}" class="avg-line"/>
+    <text x="${W-PR+2}" y="${y(avg)-4}" style="font-size:9px;fill:var(--amber)">avg</text>
+    <path d="${path}" class="data-line"/>${dots}${xLabels}</svg></div>`;
+
+  wrap.querySelectorAll(".dot").forEach(dot=>{
+    dot.addEventListener("mouseenter",e=>{
+      const tt=el("tooltip");
+      tt.textContent=dot.dataset.tip;
+      tt.style.display="block";
+      const r=wrap.getBoundingClientRect();
+      tt.style.left=(e.clientX-r.left+10)+"px";
+      tt.style.top=(e.clientY-r.top-30)+"px";
+    });
+    dot.addEventListener("mouseleave",()=>{el("tooltip").style.display="none"});
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TRANSACTION TABLE
+// ═══════════════════════════════════════════════════════════
+function getFilteredTxns(){
+  let data=selTxn().map(t=>({date:t[0],vendor:t[1],amount:t[2],cat:t[3]}));
+  if(txnSearch){
+    const s=txnSearch.toLowerCase();
+    data=data.filter(t=>t.vendor.toLowerCase().includes(s)||t.cat.toLowerCase().includes(s)||(CAT_META[t.cat]?.label||"").toLowerCase().includes(s));
+  }
+  const cols=["date","vendor","amount","cat"];
+  data.sort((a,b)=>{
+    let va=a[cols[txnSortCol]],vb=b[cols[txnSortCol]];
+    if(typeof va==="string") return txnSortAsc?va.localeCompare(vb):vb.localeCompare(va);
+    return txnSortAsc?va-vb:vb-va;
+  });
+  return data;
+}
+function renderTxnTable(){
+  const data=getFilteredTxns();
+  const total=data.reduce((s,t)=>s+t.amount,0);
+  el("txnCount").textContent=`${data.length} transactions | Total: ${fmt(total)}`;
+  const cols=["Date","Vendor","Amount","Category"];
+  let h=`<div class="tw"><table><thead><tr>`;
+  cols.forEach((c,i)=>{
+    const sorted=i===txnSortCol;
+    h+=`<th class="${i===2?"num":""} ${sorted?"sorted":""}${sorted&&!txnSortAsc?" desc":""}" onclick="sortTxn(${i})">${c}</th>`;
+  });
+  h+=`</tr></thead><tbody>`;
+  data.slice(0,200).forEach(t=>{
+    const meta=CAT_META[t.cat]||CAT_META.others;
+    h+=`<tr><td style="white-space:nowrap">${t.date}</td><td>${t.vendor}</td><td class="num">${fmt(t.amount)}</td><td><span class="cat-dot" style="background:${meta.color}"></span>${meta.label}</td></tr>`;
+  });
+  if(data.length>200) h+=`<tr><td colspan="4" style="text-align:center;color:var(--text3);font-size:11px">Showing top 200 of ${data.length} results</td></tr>`;
+  h+=`</tbody></table></div>`;
+  el("txnTableWrap").innerHTML=h;
+}
+function onTxnSearch(v){txnSearch=v;renderTxnTable();}
+function sortTxn(col){
+  if(txnSortCol===col) txnSortAsc=!txnSortAsc;
+  else{txnSortCol=col;txnSortAsc=col===2?false:true;}
+  renderTxnTable();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INSIGHTS
+// ═══════════════════════════════════════════════════════════
+function renderInsights(qs,mo,ts){
+  if(mo===0) return `<div class="box"><p style="color:var(--text3)">Select quarters to see insights.</p></div>`;
+  const waterPct=(catTotal("water")/ts*100).toFixed(0);
+  const elecFirst=qs[0].cats.electricity/qs[0].months;
+  const elecLast=qs[qs.length-1].cats.electricity/qs[qs.length-1].months;
+  const elecGrowth=qs.length>1?((elecLast-elecFirst)/elecFirst*100).toFixed(0):"0";
+
+  const cats=Object.keys(CAT_META);
+  const biggest=cats.reduce((a,c)=>catTotal(c)>catTotal(a)?c:a,cats[0]);
+  const bigMeta=CAT_META[biggest];
+  const bigPct=(catTotal(biggest)/ts*100).toFixed(0);
+  const fastestGrowing=qs.length>1?cats.filter(c=>qs[0].cats[c]>0).reduce((best,c)=>{
+    const g=(qs[qs.length-1].cats[c]/qs[qs.length-1].months)/(qs[0].cats[c]/qs[0].months);
+    return g>best.g?{c,g}:best;
+  },{c:cats[0],g:0}):null;
+  const fgMeta=fastestGrowing?CAT_META[fastestGrowing.c]:null;
+  const fgPct=fastestGrowing?((fastestGrowing.g-1)*100).toFixed(0):"0";
+
+  let h=`<div class="insight-grid">
+    <div class="insight r"><div class="insight-t">${bigMeta.label} is ${bigPct}% of All Spend</div><div class="insight-d">${fmt(catTotal(biggest))} over ${mo} months (${fmt(catTotal(biggest)/mo)}/month). The single largest expense category in the selected period.</div></div>
+    <div class="insight g"><div class="insight-t">Stable Core Operations</div><div class="insight-d">Fogging (${fmt(catTotal("fogging")/mo)}/mo), BBMP Garbage (${fmt(catTotal("bbmp")/mo)}/mo), and Salary (${fmt(catTotal("salary")/mo)}/mo) show minimal variance — well-managed contracts.</div></div>
+    <div class="insight a"><div class="insight-t">Electricity ${+elecGrowth>0?"Up":"Changed"} ${Math.abs(+elecGrowth)}% Over Period</div><div class="insight-d">BESCOM bills: ${fmt(elecFirst)}/mo → ${fmt(elecLast)}/mo. Consider LED upgrades, timer controls, or solar panels.</div></div>
+    <div class="insight b"><div class="insight-t">${fgMeta?fgMeta.label+" Grew "+fgPct+"%":"Security Costs Stabilized"}</div><div class="insight-d">${fgMeta?`Monthly avg went from ${fmt(qs[0].cats[fastestGrowing.c]/qs[0].months)} to ${fmt(qs[qs.length-1].cats[fastestGrowing.c]/qs[qs.length-1].months)}. Worth monitoring.`:`${fmt(catTotal("security"))} total, ~${fmt(catTotal("security")/mo)}/month.`}</div></div>
+  </div>`;
+  h+=`<div class="tw" style="margin-top:16px"><table><thead><tr><th>Area</th><th>${mo}-Mo Total</th><th>Monthly Avg</th><th>Opportunity</th><th>Est. Saving</th></tr></thead><tbody>
+    <tr><td><span class="cat-dot" style="background:#3b82f6"></span>Water Supply</td><td class="num">${fmt(catTotal("water"))}</td><td class="num">${fmt(catTotal("water")/mo)}</td><td>Rainwater harvesting, bore well</td><td class="num">10\u201320%</td></tr>
+    <tr><td><span class="cat-dot" style="background:#f59e0b"></span>Electricity</td><td class="num">${fmt(catTotal("electricity"))}</td><td class="num">${fmt(catTotal("electricity")/mo)}</td><td>LED, timers, solar panels</td><td class="num">5\u201315%</td></tr>
+    <tr><td><span class="cat-dot" style="background:#dc2626"></span>Generator</td><td class="num">${fmt(catTotal("generator"))}</td><td class="num">${fmt(catTotal("generator")/mo)}</td><td>Single diesel vendor, bulk rate</td><td class="num">10\u201315%</td></tr>
+    <tr><td><span class="cat-dot" style="background:#ef4444"></span>Plumbing</td><td class="num">${fmt(catTotal("plumbing"))}</td><td class="num">${fmt(catTotal("plumbing")/mo)}</td><td>Preventive maintenance program</td><td class="num">15\u201325%</td></tr>
+  </tbody></table></div>`;
+  const annual=ts/mo*12;
+  h+=`<div class="stats stats-3" style="margin-top:16px">
+    <div class="stat" style="border-top:3px solid var(--accent)"><div class="stat-v">${fmt(annual)}</div><div class="stat-l">Projected Annual</div></div>
+    <div class="stat" style="border-top:3px solid var(--green)"><div class="stat-v n">${fmt(ts/mo)}</div><div class="stat-l">Monthly Average</div></div>
+    <div class="stat" style="border-top:3px solid var(--amber)"><div class="stat-v" style="color:var(--amber)">${fmt(catTotal("water")/mo*12)}</div><div class="stat-l">Water Alone (Annual)</div></div>
+  </div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR NAV + SCROLL SPY
+// ═══════════════════════════════════════════════════════════
+function renderSidebar(){
+  el("sidebarNav").innerHTML=SECTIONS.map(s=>`<a class="nav-link" href="#sec-${s.id}" data-sec="${s.id}"><span class="icon">${s.icon}</span><span>${s.label}</span></a>`).join("");
+  const mobNav=el("mobileNavInner");
+  if(mobNav) mobNav.innerHTML=SECTIONS.map(s=>`<a class="mob-link" href="#sec-${s.id}" data-sec="${s.id}"><span class="mob-icon">${s.icon}</span><span>${s.label}</span></a>`).join("");
+}
+function initScrollSpy(){
+  const links=document.querySelectorAll(".nav-link,.mob-link");
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const secId=e.target.id.replace("sec-","");
+        links.forEach(l=>l.classList.toggle("active",l.dataset.sec===secId));
+        const activeM=document.querySelector(".mob-link.active");
+        if(activeM) activeM.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+      }
+    });
+  },{rootMargin:"-20% 0px -70% 0px"});
+  SECTIONS.forEach(s=>{const sec=el("sec-"+s.id);if(sec)observer.observe(sec);});
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FILTER BAR
+// ═══════════════════════════════════════════════════════════
+function renderFilterBar(){
+  let h=`<span class="filter-label">Quarters</span>`;
+  h+=`<button class="filter-chip ${selected.size===QUARTERS.length?"on":""}" onclick="toggleAll()">All</button>`;
+  QUARTERS.forEach(q=>{
+    h+=`<button class="filter-chip ${selected.has(q.id)?"on":""}" onclick="toggleQ('${q.id}')">${q.label}</button>`;
+  });
+  el("filterBar").innerHTML=h;
+}
+function toggleQ(id){
+  if(selected.has(id)){if(selected.size>1)selected.delete(id)}else selected.add(id);
+  renderFilterBar();renderAll();initScrollSpy();
+}
+function toggleAll(){
+  if(selected.size===QUARTERS.length){selected=new Set([QUARTERS[QUARTERS.length-1].id])}
+  else{selected=new Set(QUARTERS.map(q=>q.id))}
+  renderFilterBar();renderAll();initScrollSpy();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════════════════════
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.dataset.theme==="dark";
+  html.dataset.theme=isDark?"light":"dark";
+  el("btnTheme").textContent=isDark?"Dark":"Light";
+  const mob=el("mobTheme"); if(mob) mob.textContent=isDark?"🌙":"☀️";
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+renderSidebar();
+renderFilterBar();
+renderAll();
+setTimeout(initScrollSpy,100);
 </script>
 </body>
 </html>
