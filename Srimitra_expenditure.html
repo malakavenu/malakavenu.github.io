@@ -83,6 +83,20 @@ section{margin-bottom:40px;scroll-margin-top:20px}
 .spark-lbl{font-size:11px;font-weight:600}
 .spark-sub{font-size:9px;color:var(--text3)}
 
+.bar-chart-wrap{position:relative;margin:12px 0}
+.bar-row{display:grid;gap:6px;margin:12px 0}
+.bar-col{text-align:center}
+.bar-area{height:160px;display:flex;align-items:flex-end;justify-content:center;gap:3px;margin-bottom:6px}
+.bar-stick{width:20px;border-radius:3px 3px 0 0;position:relative;transition:height .4s;cursor:pointer}
+.bar-stick:hover{opacity:.8}
+.bar-stick .bv{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-size:7px;font-weight:700;white-space:nowrap}
+.bar-lbl{font-size:9px;font-weight:600}
+.bar-sub{font-size:8px;color:var(--text3)}
+
+.chart-legend{display:flex;gap:16px;justify-content:center;margin-bottom:8px;font-size:11px}
+.chart-legend span{display:flex;align-items:center;gap:4px}
+.chart-legend .ldot{width:10px;height:3px;border-radius:2px}
+
 .hbar-row{display:flex;align-items:center;margin-bottom:7px}
 .hbar-label{width:110px;font-size:11px;color:var(--text2);text-align:right;padding-right:10px;flex-shrink:0}
 .hbar-track{flex:1;height:10px;background:var(--surface2);border-radius:5px;overflow:hidden}
@@ -288,6 +302,10 @@ tbody tr:last-child td{border-bottom:none}
   .line-chart text{font-size:8px}
 
   .chart-tooltip{font-size:10px;padding:8px 12px}
+
+  .bar-stick{width:14px}
+  .bar-stick .bv{font-size:6px}
+  .bar-area{height:120px}
 }
 
 /* ═══════ PRINT ═══════ */
@@ -673,6 +691,9 @@ const fmt = n => {
   return "\u20B9"+Math.round(n).toLocaleString("en-IN");
 };
 const fmtL = n => (n/100000).toFixed(2)+"L";
+const fmtFull = n => "\u20B9"+Math.round(n).toLocaleString("en-IN");
+const showTip = (e,text) => {const t=el("tooltip");t.textContent=text;t.style.display="block";t.style.left=e.pageX+12+"px";t.style.top=e.pageY-28+"px";};
+const hideTip = () => {el("tooltip").style.display="none";};
 const pct = (a,b) => b?((a-b)/b*100).toFixed(1):"\u2014";
 const pillClass = v => v>5?"up":v<-5?"dn":"fl";
 const sel = () => QUARTERS.filter(q=>selected.has(q.id));
@@ -751,12 +772,33 @@ const PURPOSE = {
 // ═══════════════════════════════════════════════════════════
 //  SECTIONS DEFINITION
 // ═══════════════════════════════════════════════════════════
+const BANK_QUARTERLY = {
+  'q3fy25':{label:'Q3 FY25',period:'Nov\u2013Dec 2024',income:1289962,expense:1154440,net:135522,openBal:762023,closeBal:897545},
+  'q4fy25':{label:'Q4 FY25',period:'Jan\u2013Mar 2025',income:2506356,expense:2520357,net:-14001,openBal:897545,closeBal:883544},
+  'q1fy26':{label:'Q1 FY26',period:'Apr\u2013Jun 2025',income:2267179,expense:2024151,net:243028,openBal:883544,closeBal:1126572},
+  'q2fy26':{label:'Q2 FY26',period:'Jul\u2013Sep 2025',income:2463374,expense:2522743,net:-59369,openBal:1126572,closeBal:1067203}
+};
+const BANK_MONTHLY = [
+  {m:'Nov 24',income:713251,expense:605127,net:108124,bal:870147},
+  {m:'Dec 24',income:576711,expense:549313,net:27398,bal:897545},
+  {m:'Jan 25',income:723750,expense:519351,net:204399,bal:1101944},
+  {m:'Feb 25',income:910109,expense:1211808,net:-301699,bal:800245},
+  {m:'Mar 25',income:872497,expense:789198,net:83299,bal:883544},
+  {m:'Apr 25',income:744387,expense:737243,net:7144,bal:890688},
+  {m:'May 25',income:862925,expense:577231,net:285694,bal:1176382},
+  {m:'Jun 25',income:659867,expense:709677,net:-49810,bal:1126572},
+  {m:'Jul 25',income:878092,expense:785721,net:92371,bal:1218943},
+  {m:'Aug 25',income:760997,expense:983834,net:-222837,bal:996106},
+  {m:'Sep 25',income:824285,expense:753188,net:71097,bal:1067203}
+];
+
 const SECTIONS = [
   {id:"overview",   label:"Overview",          icon:"\u25A3"},
   {id:"quarterly",  label:"Quarterly Timeline", icon:"\u2593"},
   {id:"monthly",    label:"Monthly Breakdown",  icon:"\uD83D\uDCC5"},
   {id:"categories", label:"Category Analysis",  icon:"\u25C9"},
   {id:"heatmap",    label:"Spending Heatmap",   icon:"\uD83D\uDD25"},
+  {id:"bankcomp",   label:"Bank Comparison",    icon:"\uD83C\uDFE6"},
   {id:"yoy",        label:"Year-over-Year",     icon:"\u21C5"},
   {id:"cumulative", label:"Cumulative Trend",   icon:"\u2197"},
   {id:"onetime",    label:"One-Time Expenses",  icon:"\u26A1"},
@@ -791,6 +833,9 @@ function renderAll(){
   h+=`</section>`;
   h+=`<section id="sec-heatmap"><div class="sec-title">Spending Heatmap</div><div class="sec-desc">Category x Month intensity grid. Darker cells = higher spending. Hover for details.</div>`;
   h+=renderHeatmap();
+  h+=`</section>`;
+  h+=`<section id="sec-bankcomp"><div class="sec-title">Bank Account Comparison</div><div class="sec-desc">Committee expenditure vs bank account income &amp; outflow \u2014 monthly &amp; quarterly alignment for overlapping months (Nov 2024\u2013Sep 2025)</div>`;
+  h+=renderBankComparison(qs);
   h+=`</section>`;
   h+=`<section id="sec-yoy"><div class="sec-title">Year-over-Year Comparison</div><div class="sec-desc">Same-quarter comparison across years to identify structural cost changes.</div>`;
   h+=renderYoY();
@@ -1341,6 +1386,128 @@ function sortTxn(col){
 // ═══════════════════════════════════════════════════════════
 //  INSIGHTS
 // ═══════════════════════════════════════════════════════════
+function renderBankComparison(qs){
+  const bKeys=Object.keys(BANK_QUARTERLY);
+  const selQIds=qs.map(q=>q.id);
+  const matched=bKeys.filter(k=>selQIds.includes(k));
+
+  const selML=selMonthLabels();
+  const mRows=BANK_MONTHLY.filter(bm=>selML.has(bm.m)).map(bm=>{
+    const em=MONTHLY.find(x=>x.m===bm.m);
+    return{m:bm.m,exp:em?em.v:0,income:bm.income,expense:bm.expense,net:bm.net,bal:bm.bal};
+  });
+
+  if(!matched.length&&!mRows.length) return `<div class="box"><p style="color:var(--text3)">Bank data available for Nov 2024\u2013Sep 2025. Select matching quarters to compare.</p></div>`;
+
+  let totalExp=0,totalBankI=0,totalBankE=0,totalBankN=0;
+  const qRows=matched.map(k=>{
+    const b=BANK_QUARTERLY[k];
+    const q=qs.find(x=>x.id===k);
+    const exp=q?q.total:0;
+    totalExp+=exp;totalBankI+=b.income;totalBankE+=b.expense;totalBankN+=b.net;
+    return{k,b,exp};
+  });
+
+  let mTotExp=0,mTotI=0,mTotE=0,mTotN=0;
+  mRows.forEach(r=>{mTotExp+=r.exp;mTotI+=r.income;mTotE+=r.expense;mTotN+=r.net;});
+
+  let h=`<div class="stats" style="margin-bottom:16px"><div class="stat stat-accent" style="border-color:var(--amber)"><div class="stat-v" style="color:var(--amber)">${fmt(mTotExp||totalExp)}</div><div class="stat-l">Committee Expenditure</div></div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--green)"><div class="stat-v up">${fmt(mTotI||totalBankI)}</div><div class="stat-l">Bank Income</div></div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--red)"><div class="stat-v dn">${fmt(mTotE||totalBankE)}</div><div class="stat-l">Bank Outflow</div></div>`;
+  h+=`<div class="stat stat-accent" style="border-color:var(--teal)"><div class="stat-v tl">${fmt(mTotN||totalBankN)}</div><div class="stat-l">Bank Net</div></div></div>`;
+
+  // ── Monthly Comparison ──
+  if(mRows.length){
+    const maxM=Math.max(...mRows.map(r=>Math.max(r.income,r.expense,r.exp)));
+    const barH=150;
+
+    h+=`<div class="box"><div class="box-title">Monthly: Committee Expenditure vs Bank Income &amp; Outflow</div>`;
+    h+=`<div class="chart-legend"><span><span class="ldot" style="background:var(--amber)"></span>Committee Exp.</span><span><span class="ldot" style="background:var(--green)"></span>Bank Income</span><span><span class="ldot" style="background:var(--red)"></span>Bank Outflow</span></div>`;
+    h+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="bar-chart-wrap"><div class="bar-row" style="grid-template-columns:repeat(${mRows.length},1fr);min-width:${mRows.length*100}px">`;
+    mRows.forEach(r=>{
+      const hC=Math.max(4,(r.exp/maxM)*barH);
+      const hI=Math.max(4,(r.income/maxM)*barH);
+      const hE=Math.max(4,(r.expense/maxM)*barH);
+      h+=`<div class="bar-col"><div class="bar-area" style="gap:3px">`;
+      h+=`<div class="bar-stick" style="height:${hC}px;background:var(--amber);width:22px" onmouseover="showTip(event,'${r.m} Committee: ${fmtFull(r.exp)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--amber);font-size:8px">${fmtL(r.exp)}</span></div>`;
+      h+=`<div class="bar-stick" style="height:${hI}px;background:var(--green);width:22px" onmouseover="showTip(event,'${r.m} Income: ${fmtFull(r.income)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--green);font-size:8px">${fmtL(r.income)}</span></div>`;
+      h+=`<div class="bar-stick" style="height:${hE}px;background:var(--red);width:22px" onmouseover="showTip(event,'${r.m} Outflow: ${fmtFull(r.expense)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--red);font-size:8px">${fmtL(r.expense)}</span></div>`;
+      h+=`</div><div class="bar-lbl" style="font-size:9px">${r.m.split(" ")[0].substring(0,3)}</div><div class="bar-sub">${r.m.split(" ")[1]||""}</div></div>`;
+    });
+    h+=`</div></div></div></div>`;
+
+    // Monthly diff line chart (SVG) — shows gap: bank outflow − committee exp per month
+    const diffs=mRows.map(r=>r.expense-r.exp);
+    const svgW=Math.max(400,mRows.length*70),svgH=120,padL=50,padR=20,padT=20,padB=30;
+    const drawW=svgW-padL-padR, drawH=svgH-padT-padB;
+    const allV=diffs.concat([0]);
+    const minV=Math.min(...allV),maxV=Math.max(...allV);
+    const range=maxV-minV||1;
+    const sx=i=>padL+(i/(mRows.length-1||1))*drawW;
+    const sy=v=>padT+(1-(v-minV)/range)*drawH;
+    const pts=diffs.map((v,i)=>`${sx(i)},${sy(v)}`).join(" ");
+    const zeroY=sy(0);
+    h+=`<div class="box"><div class="box-title">Monthly Gap: Bank Outflow \u2212 Committee Expenditure</div>`;
+    h+=`<p style="font-size:11px;color:var(--text3);margin:0 0 8px">Positive = bank paid more than committee recorded. Negative = committee recorded more than bank outflow.</p>`;
+    h+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><svg width="${svgW}" height="${svgH}" style="font-family:inherit">`;
+    h+=`<line x1="${padL}" x2="${svgW-padR}" y1="${zeroY}" y2="${zeroY}" stroke="var(--text3)" stroke-dasharray="4,4" opacity="0.5"/>`;
+    h+=`<text x="${padL-6}" y="${zeroY+3}" text-anchor="end" style="font-size:9px;fill:var(--text3)">0</text>`;
+    h+=`<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    diffs.forEach((v,i)=>{
+      const cx=sx(i),cy=sy(v);
+      const col=v>0?'var(--red)':'var(--green)';
+      h+=`<circle cx="${cx}" cy="${cy}" r="5" fill="${col}" stroke="var(--surface)" stroke-width="2" onmouseover="showTip(event,'${mRows[i].m}: ${v>0?'+':''}${fmtFull(v)}')" onmouseout="hideTip()"/>`;
+      h+=`<text x="${cx}" y="${svgH-6}" text-anchor="middle" style="font-size:8px;fill:var(--text3)">${mRows[i].m.split(" ")[0].substring(0,3)}</text>`;
+    });
+    h+=`</svg></div></div>`;
+
+    // Monthly table
+    h+=`<div class="tw"><table><thead><tr><th>Month</th><th class="num">Committee Exp.</th><th class="num">Bank Income</th><th class="num">Bank Outflow</th><th class="num">Gap (Out\u2212Exp)</th><th class="num">Bank Net</th><th class="num">Balance</th></tr></thead><tbody>`;
+    mRows.forEach(r=>{
+      const gap=r.expense-r.exp;
+      const gapCol=gap>0?'var(--red)':'var(--green)';
+      h+=`<tr><td style="font-weight:600">${r.m}</td><td class="num" style="color:var(--amber)">${fmtFull(r.exp)}</td><td class="num" style="color:var(--green)">${fmtFull(r.income)}</td><td class="num" style="color:var(--red)">${fmtFull(r.expense)}</td><td class="num" style="color:${gapCol}">${gap>0?'+':''}${fmtFull(gap)}</td><td class="num" style="color:${r.net>0?'var(--green)':'var(--red)'}">${r.net>0?'+':''}${fmtFull(r.net)}</td><td class="num">${fmtFull(r.bal)}</td></tr>`;
+    });
+    const totalGap=mTotE-mTotExp;
+    h+=`<tr class="tr-total"><td>Total</td><td class="num">${fmtFull(mTotExp)}</td><td class="num">${fmtFull(mTotI)}</td><td class="num">${fmtFull(mTotE)}</td><td class="num" style="color:${totalGap>0?'var(--red)':'var(--green)'}">${totalGap>0?'+':''}${fmtFull(totalGap)}</td><td class="num">${mTotN>0?'+':''}${fmtFull(mTotN)}</td><td class="num">${fmtFull(mRows[mRows.length-1].bal)}</td></tr></tbody></table></div>`;
+
+    // Monthly insights
+    const peakGap=mRows.reduce((a,b)=>(b.expense-b.exp)>(a.expense-a.exp)?b:a);
+    const bestMatch=mRows.reduce((a,b)=>Math.abs(b.expense-b.exp)<Math.abs(a.expense-a.exp)?b:a);
+    const avgExp=mTotExp/mRows.length, avgBankE=mTotE/mRows.length;
+    h+=`<div class="insight-grid">`;
+    h+=`<div class="insight a"><div class="insight-t">Biggest Mismatch</div><div class="insight-d"><strong>${peakGap.m}</strong> \u2014 Bank outflow exceeded committee records by <strong>${fmtFull(peakGap.expense-peakGap.exp)}</strong>. Likely due to vendor advances, contractor settlements, or bank charges.</div></div>`;
+    h+=`<div class="insight g"><div class="insight-t">Best Alignment</div><div class="insight-d"><strong>${bestMatch.m}</strong> \u2014 Gap of only <strong>${fmtFull(Math.abs(bestMatch.expense-bestMatch.exp))}</strong> between bank outflow and committee expenditure. Accounts well reconciled.</div></div>`;
+    h+=`<div class="insight b"><div class="insight-t">Average Monthly</div><div class="insight-d">Committee avg: <strong>${fmtFull(avgExp)}/mo</strong>. Bank outflow avg: <strong>${fmtFull(avgBankE)}/mo</strong>. Bank income avg: <strong>${fmtFull(mTotI/mRows.length)}/mo</strong>.</div></div>`;
+    const coverage=(mTotExp/mTotE*100).toFixed(1);
+    h+=`<div class="insight ${coverage>85?'g':coverage>70?'b':'a'}"><div class="insight-t">Expenditure Coverage</div><div class="insight-d">Committee records account for <strong>${coverage}%</strong> of total bank outflows. ${coverage>85?'Excellent record-keeping.':coverage>70?'Good tracking with minor gaps.':'Significant untracked bank outflows — review vendor payments.'}</div></div>`;
+    h+=`</div>`;
+  }
+
+  // ── Quarterly Comparison ──
+  if(qRows.length){
+    const maxBar=Math.max(...qRows.map(r=>Math.max(r.b.income,r.b.expense,r.exp)));
+    h+=`<div class="box" style="margin-top:24px"><div class="box-title">Quarterly Summary: Committee vs Bank</div>`;
+    h+=`<div class="chart-legend"><span><span class="ldot" style="background:var(--amber)"></span>Committee Exp.</span><span><span class="ldot" style="background:var(--green)"></span>Bank Income</span><span><span class="ldot" style="background:var(--red)"></span>Bank Outflow</span></div>`;
+    h+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div class="bar-chart-wrap"><div class="bar-row" style="grid-template-columns:repeat(${qRows.length},1fr);min-width:${qRows.length*160}px">`;
+    qRows.forEach(r=>{
+      const hC=Math.max(4,(r.exp/maxBar)*160);
+      const hI=Math.max(4,(r.b.income/maxBar)*160);
+      const hE=Math.max(4,(r.b.expense/maxBar)*160);
+      h+=`<div class="bar-col"><div class="bar-area" style="gap:4px"><div class="bar-stick" style="height:${hC}px;background:var(--amber);width:28px" onmouseover="showTip(event,'${r.b.label} Committee: ${fmtFull(r.exp)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--amber)">${fmt(r.exp)}</span></div><div class="bar-stick" style="height:${hI}px;background:var(--green);width:28px" onmouseover="showTip(event,'${r.b.label} Bank Income: ${fmtFull(r.b.income)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--green)">${fmt(r.b.income)}</span></div><div class="bar-stick" style="height:${hE}px;background:var(--red);width:28px" onmouseover="showTip(event,'${r.b.label} Bank Outflow: ${fmtFull(r.b.expense)}')" onmouseout="hideTip()"><span class="bv" style="color:var(--red)">${fmt(r.b.expense)}</span></div></div><div class="bar-lbl">${r.b.label}</div><div class="bar-sub">${r.b.period}</div></div>`;
+    });
+    h+=`</div></div></div></div>`;
+
+    h+=`<div class="tw"><table><thead><tr><th>Quarter</th><th>Period</th><th class="num">Committee Exp.</th><th class="num">Bank Income</th><th class="num">Bank Outflow</th><th class="num">Bank Net</th><th class="num">Balance</th></tr></thead><tbody>`;
+    qRows.forEach(r=>{
+      h+=`<tr><td style="font-weight:600">${r.b.label}</td><td style="color:var(--text3)">${r.b.period}</td><td class="num" style="color:var(--amber)">${fmtFull(r.exp)}</td><td class="num" style="color:var(--green)">${fmtFull(r.b.income)}</td><td class="num" style="color:var(--red)">${fmtFull(r.b.expense)}</td><td class="num" style="color:${r.b.net>0?'var(--green)':'var(--red)'}">${fmtFull(r.b.net)}</td><td class="num">${fmtFull(r.b.closeBal)}</td></tr>`;
+    });
+    h+=`<tr class="tr-total"><td>Total</td><td></td><td class="num">${fmtFull(totalExp)}</td><td class="num">${fmtFull(totalBankI)}</td><td class="num">${fmtFull(totalBankE)}</td><td class="num">${fmtFull(totalBankN)}</td><td class="num">${fmtFull(qRows[qRows.length-1].b.closeBal)}</td></tr></tbody></table></div>`;
+  }
+
+  return h;
+}
+
 function renderInsights(qs,mo,ts){
   if(mo===0) return `<div class="box"><p style="color:var(--text3)">Select quarters to see insights.</p></div>`;
   const waterPct=(catTotal("water")/ts*100).toFixed(0);
